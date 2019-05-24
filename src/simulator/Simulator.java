@@ -736,23 +736,12 @@ public class Simulator {
 				mulReserv.reservationStation[i].Q[0] = 0;
 			}
 			if(mulReserv.reservationStation[i].Q[1] == writeBackId) {
-				// div 0 NEED TO CHANGE !!!
-				if(reg.tempReg[tempIndex] == 0) {
-					// set the instr
-					if(instructions.instruction[mulReserv.reservationStation[i].instrIndex].execCompClock == -1) {
-						// div 0 error
-						instructions.instruction[mulReserv.reservationStation[i].instrIndex].execCompClock = -2;
-					}
-					if(instructions.instruction[mulReserv.reservationStation[i].instrIndex].writeResultClock == -1) {
-						// div 0 error
-						instructions.instruction[mulReserv.reservationStation[i].instrIndex].writeResultClock = -2;
-					}
-					
-					// clear Fu
-					reg.Fu[instructions.instruction[mulReserv.reservationStation[i].instrIndex].operand1] = -10086;
-					
-					// clear RS
-					mulReserv.reservationStation[i].clearReserv();
+				// div 0 
+				if(reg.tempReg[tempIndex] == 0 && mulReserv.reservationStation[i].type == DIV) {
+					reg.tempReg[reg.tempCount] = 1;
+					mulReserv.reservationStation[i].V[1] = reg.tempCount;
+					mulReserv.reservationStation[i].Q[1] = 0;
+					reg.tempCount++;
 				}
 				else {
 					// update data
