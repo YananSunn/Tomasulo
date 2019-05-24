@@ -635,7 +635,7 @@ public class Simulator {
 				// addReserv clear
 				addReserv.reservationStation[i].clearReserv();
 				addReserv.busySize--;
-				addFunc.busySize--;
+//				addFunc.busySize--;
 				
 				// update RS
 				updateReservationSta(i - 6, reg.tempCount - 1);
@@ -669,7 +669,7 @@ public class Simulator {
 				// addReserv clear
 				mulReserv.reservationStation[i].clearReserv();
 				mulReserv.busySize--;
-				mulFunc.busySize--;
+//				mulFunc.busySize--;
 				
 				// update RS
 				updateReservationSta(i - 9, reg.tempCount - 1);
@@ -697,38 +697,14 @@ public class Simulator {
 				// addReserv clear
 				loadReserv.reservationStation[i].clearReserv();
 				loadReserv.busySize--;
-				loadFunc.busySize--;
+//				loadFunc.busySize--;
 				
 				// update RS and FU
 				updateReservationSta(i - 12, reg.tempCount - 1);
 			}
 		}
 		
-		// jump
-		if(isJump == true && jumpTime == 0) {
-
-			// instr
-			if(instructions.instruction[jumpIndex].writeResultClock == -1) {
-				instructions.instruction[jumpIndex].writeResultClock = clock;
-			}
-			
-			// check ==
-			if(instructions.instruction[jumpIndex].operand1 == reg.Fu[jumpV]) {
-				// jump
-				currentInstr += instructions.instruction[jumpIndex].operand3;
-			}
-			else {
-				// not jump
-			}
-			
-			// clear para
-			isJump = false;
-			waitJump = false;
-			jumpTime = -1;
-			jumpIndex = -1;
-			jumpV = -1;
-			jumpQ = 0;
-		}
+		
 		
 	}
 	
@@ -819,6 +795,7 @@ public class Simulator {
 					if(instructions.instruction[addReserv.reservationStation[i].instrIndex].execCompClock == -1) {
 						instructions.instruction[addReserv.reservationStation[i].instrIndex].execCompClock = clock;
 					}
+					addFunc.busySize--;
 				}
 			}
 		}
@@ -831,6 +808,7 @@ public class Simulator {
 					if(instructions.instruction[mulReserv.reservationStation[i].instrIndex].execCompClock == -1) {
 						instructions.instruction[mulReserv.reservationStation[i].instrIndex].execCompClock = clock;
 					}
+					mulFunc.busySize--;
 				}
 			}
 		}
@@ -843,6 +821,7 @@ public class Simulator {
 					if(instructions.instruction[loadReserv.reservationStation[i].instrIndex].execCompClock == -1) {
 						instructions.instruction[loadReserv.reservationStation[i].instrIndex].execCompClock = clock;
 					}
+					loadFunc.busySize--;
 				}
 			}
 		}
@@ -854,6 +833,26 @@ public class Simulator {
 				if(instructions.instruction[jumpIndex].execCompClock == -1) {
 					instructions.instruction[jumpIndex].execCompClock = clock;
 				}
+				// jump
+				
+				
+				// check ==
+				if(instructions.instruction[jumpIndex].operand1 == reg.Fu[jumpV]) {
+					// jump
+					currentInstr += instructions.instruction[jumpIndex].operand3;
+				}
+				else {
+					// not jump
+				}
+				
+				// clear para
+				isJump = false;
+				waitJump = false;
+				jumpTime = -1;
+				jumpIndex = -1;
+				jumpV = -1;
+				jumpQ = 0;
+			
 			}
 		}
 		
