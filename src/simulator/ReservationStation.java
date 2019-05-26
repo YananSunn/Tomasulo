@@ -28,4 +28,11 @@ public class ReservationStation {
 			System.out.println(reservationStation[i].Q[0]+","+reservationStation[i].Q[1]);
 		}
 	}
+	
+	void clearReserv() {
+		for(int i = 0; i < totalSize; i++) {
+			reservationStation[i].clearReserv();
+		}
+		busySize = 0;
+	}
 }

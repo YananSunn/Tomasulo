@@ -2,10 +2,12 @@ package simulator;
 
 public class Instruction {
 	public Instr[] instruction;
+	String[] instructionsString;
 	int instrSize;
 	
 	Instruction(){
 		instruction = new Instr[1000];
+		instructionsString = new String[1000];
 	}
 	
 	void checkInstr() {

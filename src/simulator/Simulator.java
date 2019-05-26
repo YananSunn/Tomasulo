@@ -9,6 +9,7 @@ import java.io.IOException;
 public class Simulator {
 	Instruction instructions;
 	String fileName;
+	
 	int currentInstr = 0;
 	int clock = 1;
 	
@@ -23,11 +24,11 @@ public class Simulator {
 	RegisterResult reg;
 	
 	boolean waitJump;
-	boolean isJump;
-	int jumpTime;
-	int jumpIndex;
-	int jumpV;
-	int jumpQ;
+//	boolean isJump;
+//	int jumpTime;
+//	int jumpIndex;
+//	int jumpV;
+//	int jumpQ;
 	
 	public static final int LD = 0;
     public static final int JUMP = 1;
@@ -39,11 +40,14 @@ public class Simulator {
     public static final int ADDTIME = 3;
     public static final int LDTIME = 3;
     public static final int JUMPTIME = 1;
-    public static final int DIVTIME = 40;
-    public static final int MULTIME = 12;
+//    public static final int DIVTIME = 40;
+//    public static final int MULTIME = 12;
+    
+    public static final int DIVTIME = 4;
+    public static final int MULTIME = 4;
     
 	Simulator(){
-		fileName = "test.nel";
+		fileName = "test1.nel";
 		instructions = new Instruction();
 		addFunc = new FunctionalUnit(3);
 		mulFunc = new FunctionalUnit(2);
@@ -54,12 +58,32 @@ public class Simulator {
 		reg = new RegisterResult();
 		
 		waitJump = false;
-		isJump = false;
-		jumpTime = -1;
-		jumpIndex = -1;
-		jumpV = -1;
-		jumpQ = 0;
+//		isJump = false;
+//		jumpTime = -1;
+//		jumpIndex = -1;
+//		jumpV = -1;
+//		jumpQ = 0;
 	}
+	
+	Simulator(String fname){
+		fileName = fname;
+		instructions = new Instruction();
+		addFunc = new FunctionalUnit(3);
+		mulFunc = new FunctionalUnit(2);
+		loadFunc = new FunctionalUnit(2);
+		addReserv = new ReservationStation(6);
+		mulReserv = new ReservationStation(3);
+		loadReserv = new ReservationStation(3);
+		reg = new RegisterResult();
+		
+		waitJump = false;
+//		isJump = false;
+//		jumpTime = -1;
+//		jumpIndex = -1;
+//		jumpV = -1;
+//		jumpQ = 0;
+	}
+	
 	
 	// 指令读入
 	public void readFileByLines(String fileName) {  
@@ -75,6 +99,8 @@ public class Simulator {
                 // 显示行号  
 //                System.out.println("line " + line + ": " + tempString);  
                 
+            	instructions.instructionsString[line] = new String(tempString);
+            	
                 String tempType = "";
                 int count = 0;
                 while(tempString.charAt(count) != ',') {
@@ -323,7 +349,44 @@ public class Simulator {
 	
 	// 注意除法除0
 	public void runSimulator() {
-		while((currentInstr < instructions.instrSize || emptyReservationSta() == false) ) {
+		clearAll();
+		while((currentInstr < instructions.instrSize || emptyReservationSta() == false) && clock < 20) {
+			System.out.println("runSimulator now is " + this.clock);
+			System.out.println("currentInstr now is " + this.currentInstr);
+			System.out.println("emptyReservationSta() now is" + emptyReservationSta());
+			System.out.println(addReserv.busySize + " "+ mulReserv.busySize + " "+loadReserv.busySize);
+			if(currentInstr < instructions.instrSize) {
+				int currentInstrType = instructions.instruction[currentInstr].instrType;
+				boolean canIssue = tryIssue(currentInstrType);
+				
+				// deal with the new instr
+				if(canIssue) {
+					System.out.println("issue " + currentInstr);
+					Issue(currentInstrType);
+					currentInstr++;
+				}
+				else {
+					System.out.println("can not issue " + currentInstr);
+				}
+			}
+		
+			// deal with the old instr  DO NOT FORGET JUMP
+			
+			// first check write back
+			WriteBack();
+			
+			// then update the info
+			// check RS to run
+			ExecComp();
+		
+			this.clock++;
+		}
+		printAll();
+	}
+	
+	public int runPartSimulator(int clk) {
+		clearAll();
+		while((currentInstr < instructions.instrSize || emptyReservationSta() == false) && clock <= clk) {
 			System.out.println("runSimulator now is " + this.clock);
 			if(currentInstr < instructions.instrSize) {
 				int currentInstrType = instructions.instruction[currentInstr].instrType;
@@ -344,25 +407,15 @@ public class Simulator {
 			
 			// first check write back
 			WriteBack();
-//			updateFunc();
 			
 			// then update the info
 			// check RS to run
 			ExecComp();
 		
-			// REMEMBER update the funU busySize!!!
-			
-			
-			
-//			printAll();
-			
-//			if(clock > 4) {
-//				printJump();
-//				reg.checkFu();
-//			}
 			this.clock++;
 		}
 		printAll();
+		return clock-1;
 	}
 	
 	boolean emptyReservationSta() {
@@ -407,7 +460,9 @@ public class Simulator {
 				}
 				break;
 			case JUMP:
-				canIssue = true;
+				if(this.addReserv.busySize < this.addReserv.totalSize) {
+					canIssue = true;
+				}
 				break;
 			}
 			return canIssue;
@@ -442,21 +497,21 @@ public class Simulator {
 			this.addReserv.reservationStation[selectedRS].time = ADDTIME;
 			this.addReserv.reservationStation[selectedRS].instrIndex = currentInstr;
 			
-			if(this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2] >= 0) {
-				this.addReserv.reservationStation[selectedRS].V[0] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2];
+			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
+				this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
 			}
 			else {
-				this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2];
+				this.addReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
 			}
-			if(this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3] >= 0) {
-				this.addReserv.reservationStation[selectedRS].V[1] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3];
+			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3] != -10086) {
+				this.addReserv.reservationStation[selectedRS].Q[1] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3];
 			}
 			else {
-				this.addReserv.reservationStation[selectedRS].Q[1] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3];
+				this.addReserv.reservationStation[selectedRS].V[1] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand3];
 			}
 			
 			// deal with reg
-			this.reg.Fu[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 6;
+			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 6;
 			
 			break;
 		case SUB:
@@ -477,21 +532,21 @@ public class Simulator {
 			this.addReserv.reservationStation[selectedRS].time = ADDTIME;
 			this.addReserv.reservationStation[selectedRS].instrIndex = currentInstr;
 			
-			if(this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2] >= 0) {
-				this.addReserv.reservationStation[selectedRS].V[0] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2];
+			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
+				this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
 			}
 			else {
-				this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2];
+				this.addReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
 			}
-			if(this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3] >= 0) {
-				this.addReserv.reservationStation[selectedRS].V[1] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3];
+			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3] != -10086) {
+				this.addReserv.reservationStation[selectedRS].Q[1] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3];
 			}
 			else {
-				this.addReserv.reservationStation[selectedRS].Q[1] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3];
+				this.addReserv.reservationStation[selectedRS].V[1] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand3];
 			}
 			
 			// deal with reg
-			this.reg.Fu[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 6;
+			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 6;
 			break;
 		case MUL:
 			while(this.mulReserv.reservationStation[selectedRS].isBusy) {
@@ -511,21 +566,21 @@ public class Simulator {
 			this.mulReserv.reservationStation[selectedRS].time = MULTIME;
 			this.mulReserv.reservationStation[selectedRS].instrIndex = currentInstr;
 			
-			if(this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2] >= 0) {
-				this.mulReserv.reservationStation[selectedRS].V[0] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2];
+			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
+				this.mulReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
 			}
 			else {
-				this.mulReserv.reservationStation[selectedRS].Q[0] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2];
+				this.mulReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
 			}
-			if(this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3] >= 0) {
-				this.mulReserv.reservationStation[selectedRS].V[1] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3];
+			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3] != -10086) {
+				this.mulReserv.reservationStation[selectedRS].Q[1] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3];
 			}
 			else {
-				this.mulReserv.reservationStation[selectedRS].Q[1] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3];
+				this.mulReserv.reservationStation[selectedRS].V[1] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand3];
 			}
 			
 			// deal with reg
-			this.reg.Fu[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 9;
+			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 9;
 			
 			break;
 		case DIV:
@@ -546,21 +601,21 @@ public class Simulator {
 			this.mulReserv.reservationStation[selectedRS].time = DIVTIME;
 			this.mulReserv.reservationStation[selectedRS].instrIndex = currentInstr;
 			
-			if(this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2] >= 0) {
-				this.mulReserv.reservationStation[selectedRS].V[0] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2];
+			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
+				this.mulReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
 			}
 			else {
-				this.mulReserv.reservationStation[selectedRS].Q[0] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2];
+				this.mulReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
 			}
-			if(this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3] >= 0) {
-				this.mulReserv.reservationStation[selectedRS].V[1] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3];
+			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3] != -10086) {
+				this.mulReserv.reservationStation[selectedRS].Q[1] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3];
 			}
 			else {
-				this.mulReserv.reservationStation[selectedRS].Q[1] = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand3];
+				this.mulReserv.reservationStation[selectedRS].V[1] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand3];
 			}
 			
 			// deal with reg
-			this.reg.Fu[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 9;
+			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 9;
 			
 			break;
 		case LD:
@@ -584,23 +639,37 @@ public class Simulator {
 			this.loadReserv.reservationStation[selectedRS].instrIndex = currentInstr;
 			
 			// deal with reg
-			this.reg.Fu[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 12;
+			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 12;
 			break;
 		case JUMP:
+			// V[0]-F[i]  V[1]-current
+			waitJump = true;
+			while(this.addReserv.reservationStation[selectedRS].isBusy) {
+				selectedRS++;
+			}
+			System.out.println("ADD selectedRS:" + selectedRS);
+			
+			// deal with instr
 			if(this.instructions.instruction[this.currentInstr].issueClock == -1) {
 				this.instructions.instruction[this.currentInstr].issueClock = this.clock;
 			}
-
+			
 			// deal with RS
-			waitJump = true;
-			jumpTime = JUMPTIME;
-			jumpIndex = currentInstr;
-			if(this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2] >= 0) {
-				jumpV = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2];
+			// busy time run is useful   type V Q
+			this.addReserv.reservationStation[selectedRS].isBusy = true;
+			this.addReserv.busySize++;
+			this.addReserv.reservationStation[selectedRS].type = JUMP;
+			this.addReserv.reservationStation[selectedRS].time = JUMPTIME;
+			this.addReserv.reservationStation[selectedRS].instrIndex = currentInstr;
+			
+			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
+				this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
 			}
 			else {
-				jumpQ = this.reg.Fu[this.instructions.instruction[this.currentInstr].operand2];
+				this.addReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
 			}
+			System.out.println("heeeeeeeeeeeeeeeeeeeeeeeeeeeeere" +selectedRS + " "+ currentInstr);
+			this.addReserv.reservationStation[selectedRS].V[1] = currentInstr;
 			
 			break;
 		}
@@ -628,17 +697,27 @@ public class Simulator {
 					reg.tempReg[reg.tempCount] = reg.tempReg[addReserv.reservationStation[i].V[0]] - reg.tempReg[addReserv.reservationStation[i].V[1]];
 					reg.tempCount++;
 					break;
+//				case JUMP:
+//					if(instructions.instruction[addReserv.reservationStation[i].instrIndex].operand1 == reg.tempReg[addReserv.reservationStation[i].V[0]]) {
+//						// jump
+//						currentInstr = reg.tempReg[addReserv.reservationStation[i].V[1]] + instructions.instruction[addReserv.reservationStation[i].instrIndex].operand3;
+//					}
+//					else {
+//						// not jump
+//					}
+//					break;
 				}
 				// update FU
 //				reg.Fu[instructions.instruction[addReserv.reservationStation[i].instrIndex].operand1] = reg.tempCount - 1;
 				
+				int ind = addReserv.reservationStation[i].instrIndex;
 				// addReserv clear
 				addReserv.reservationStation[i].clearReserv();
 				addReserv.busySize--;
-//				addFunc.busySize--;
+				addFunc.busySize--;
 				
 				// update RS
-				updateReservationSta(i - 6, reg.tempCount - 1);
+				updateReservationSta(ind, i - 6, reg.tempCount - 1);
 			}
 		}
 		
@@ -666,13 +745,14 @@ public class Simulator {
 				// update FU
 //				reg.Fu[instructions.instruction[mulReserv.reservationStation[i].instrIndex].operand1] = reg.tempCount - 1;
 				
+				int ind = mulReserv.reservationStation[i].instrIndex;
 				// addReserv clear
 				mulReserv.reservationStation[i].clearReserv();
 				mulReserv.busySize--;
-//				mulFunc.busySize--;
+				mulFunc.busySize--;
 				
 				// update RS
-				updateReservationSta(i - 9, reg.tempCount - 1);
+				updateReservationSta(ind, i - 9, reg.tempCount - 1);
 			}
 		}
 		
@@ -694,13 +774,14 @@ public class Simulator {
 				// update FU  check before cover
 				//reg.Fu[instructions.instruction[loadReserv.reservationStation[i].instrIndex].operand1] = reg.tempCount - 1;
 				
+				int ind = loadReserv.reservationStation[i].instrIndex;
 				// addReserv clear
 				loadReserv.reservationStation[i].clearReserv();
 				loadReserv.busySize--;
-//				loadFunc.busySize--;
+				loadFunc.busySize--;
 				
 				// update RS and FU
-				updateReservationSta(i - 12, reg.tempCount - 1);
+				updateReservationSta(ind, i - 12, reg.tempCount - 1);
 			}
 		}
 		
@@ -708,7 +789,7 @@ public class Simulator {
 		
 	}
 	
-	void updateReservationSta(int writeBackId, int tempIndex) {
+	void updateReservationSta(int instrIndex, int writeBackId, int tempIndex) {
 		// add
 		for(int i = 0; i < 6; i++) {
 			// wait for data
@@ -755,22 +836,26 @@ public class Simulator {
 //			}
 		}
 		
-		// jump
-		if(jumpQ == writeBackId) {
-			jumpV = tempIndex;
-			jumpQ = 0;
-		}
-		
-//		if(jumpV > 0 && waitJump) {
-//			isJump = true;
-//		}
 		
 		// Fu
 		for(int i = 0; i < 32; i++) {
-			if(reg.Fu[i] == writeBackId) {
-				reg.Fu[i] = tempIndex;
+			if(reg.fuState[i] == writeBackId) {
+				reg.fuState[i] = -10086;
 			}
 		}
+		System.out.println(instrIndex);
+		switch(instructions.instruction[instrIndex].instrType) {
+		case ADD:
+		case SUB:
+		case MUL:
+		case DIV:
+		case LD:
+			reg.fuValue[instructions.instruction[instrIndex].operand1] = tempIndex;
+			break;
+		case JUMP:
+			break;
+		}
+		
 	}
 
 	void ExecComp() {
@@ -784,7 +869,19 @@ public class Simulator {
 					if(instructions.instruction[addReserv.reservationStation[i].instrIndex].execCompClock == -1) {
 						instructions.instruction[addReserv.reservationStation[i].instrIndex].execCompClock = clock;
 					}
-					addFunc.busySize--;
+//					addFunc.busySize--;
+					
+					if(addReserv.reservationStation[i].type == JUMP) {
+						if(instructions.instruction[addReserv.reservationStation[i].instrIndex].operand1 == reg.tempReg[addReserv.reservationStation[i].V[0]]) {
+							// jump
+							currentInstr = addReserv.reservationStation[i].V[1] + instructions.instruction[addReserv.reservationStation[i].instrIndex].operand3;
+						}
+						else {
+							// not jump
+						}
+						
+						waitJump = false;
+					}
 				}
 			}
 		}
@@ -797,7 +894,7 @@ public class Simulator {
 					if(instructions.instruction[mulReserv.reservationStation[i].instrIndex].execCompClock == -1) {
 						instructions.instruction[mulReserv.reservationStation[i].instrIndex].execCompClock = clock;
 					}
-					mulFunc.busySize--;
+//					mulFunc.busySize--;
 				}
 			}
 		}
@@ -810,40 +907,11 @@ public class Simulator {
 					if(instructions.instruction[loadReserv.reservationStation[i].instrIndex].execCompClock == -1) {
 						instructions.instruction[loadReserv.reservationStation[i].instrIndex].execCompClock = clock;
 					}
-					loadFunc.busySize--;
+//					loadFunc.busySize--;
 				}
 			}
 		}
 		
-		// jump
-		if(waitJump && isJump) {
-			jumpTime --;
-			if(jumpTime == 0) {
-				if(instructions.instruction[jumpIndex].execCompClock == -1) {
-					instructions.instruction[jumpIndex].execCompClock = clock;
-				}
-				// jump
-				
-				
-				// check ==
-				if(instructions.instruction[jumpIndex].operand1 == reg.Fu[jumpV]) {
-					// jump
-					currentInstr += instructions.instruction[jumpIndex].operand3;
-				}
-				else {
-					// not jump
-				}
-				
-				// clear para
-				isJump = false;
-				waitJump = false;
-				jumpTime = -1;
-				jumpIndex = -1;
-				jumpV = -1;
-				jumpQ = 0;
-			
-			}
-		}
 		
 		// if the funU is free  pick one to run
 		
@@ -918,13 +986,6 @@ public class Simulator {
 				break;
 			}
 		}
-		
-		// jump
-		if(waitJump == true && isJump == false) {
-			if(jumpV >= 0) {
-				isJump = true;
-			}
-		}
 	}
 	
 	boolean readyToRun(Reserv re) {
@@ -966,7 +1027,20 @@ public class Simulator {
 		loadFunc.busySize = co;
 	}
 	
-	
+	void clearAll() {
+		currentInstr = 0;
+		clock = 1;
+		waitJump = false;
+		addReserv.clearReserv();
+		mulReserv.clearReserv();
+		loadReserv.clearReserv();
+		
+		addFunc.clearFunc();
+		mulFunc.clearFunc();
+		loadFunc.clearFunc();
+		
+		reg.clearFu();
+	}
 	
 	
 	void printSta() {
@@ -990,10 +1064,10 @@ public class Simulator {
 	
 	void printJump() {
 		System.out.println("waitJump:" + waitJump);
-		System.out.println("isJump:" + isJump);
-		System.out.println("jumpTime:" + jumpTime);
-		System.out.println("jumpIndex:" + jumpIndex);
-		System.out.println("jumpV:" + jumpV);
-		System.out.println("jumpQ:" + jumpQ);
+//		System.out.println("isJump:" + isJump);
+//		System.out.println("jumpTime:" + jumpTime);
+//		System.out.println("jumpIndex:" + jumpIndex);
+//		System.out.println("jumpV:" + jumpV);
+//		System.out.println("jumpQ:" + jumpQ);
 	}
 }
