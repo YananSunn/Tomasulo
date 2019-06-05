@@ -3,6 +3,7 @@ package simulator;
 public class Reserv {
 	boolean isBusy;
 	boolean isRun;
+	boolean canRB;
 	int time;
 	int type;
 	int addr;
@@ -36,6 +37,7 @@ public class Reserv {
     Reserv(){
     	isBusy = false;
     	isRun = false;
+    	canRB = false;
     	time = -1;
     	type = -1;  
     	addr = -1;

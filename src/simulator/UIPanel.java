@@ -396,6 +396,8 @@ public class UIPanel extends JFrame {
 	public void updateUI() {
 		// need to update
 		
+		warning.setText(String.valueOf(sim.currentInstr));
+		
 		if(checkInstr != -1) {
 			instr.setText(sim.instructions.instructionsString[checkInstr]);
 			if(sim.instructions.instruction[checkInstr].issueClock != -1) {

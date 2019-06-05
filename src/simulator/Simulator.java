@@ -378,10 +378,12 @@ public class Simulator {
 			// then update the info
 			// check RS to run
 			ExecComp();
+			
+//			WriteBack();
 		
 			this.clock++;
 		}
-		printAll();
+//		printAll();
 	}
 	
 	public int runPartSimulator(int clk) {
@@ -411,10 +413,12 @@ public class Simulator {
 			// then update the info
 			// check RS to run
 			ExecComp();
+			
+//			WriteBack();
 		
 			this.clock++;
 		}
-		printAll();
+//		printAll();
 		return clock-1;
 	}
 	
@@ -657,6 +661,7 @@ public class Simulator {
 			// deal with RS
 			// busy time run is useful   type V Q
 			this.addReserv.reservationStation[selectedRS].isBusy = true;
+			this.addReserv.reservationStation[selectedRS].isRun = false;
 			this.addReserv.busySize++;
 			this.addReserv.reservationStation[selectedRS].type = JUMP;
 			this.addReserv.reservationStation[selectedRS].time = JUMPTIME;
@@ -680,6 +685,26 @@ public class Simulator {
 		// add
 		for(int i = 0; i < 6; i++) {
 			if(addReserv.reservationStation[i].isRun == true && addReserv.reservationStation[i].time == 0) {
+				
+				if(addFunc.busySize == addFunc.totalSize) {
+					int readyRun = -1;
+					int readyRunIndex = 10086;
+					for(int j = 0; j < 6; j++) {
+						if(readyToRun(addReserv.reservationStation[j])) {
+							if(addReserv.reservationStation[j].instrIndex < readyRunIndex) {
+								readyRun = j;
+								readyRunIndex = addReserv.reservationStation[j].instrIndex;
+							}
+						}
+					}
+					
+					// find one
+					if(readyRun != -1 && instructions.instruction[addReserv.reservationStation[readyRun].instrIndex].issueClock +1 != currentInstr) {
+						addReserv.reservationStation[readyRun].isRun = true;
+						addFunc.busySize++;
+					}
+				}
+				
 				// need to write back
 				
 				// inst
@@ -718,12 +743,37 @@ public class Simulator {
 				
 				// update RS
 				updateReservationSta(ind, i - 6, reg.tempCount - 1);
+				
+
 			}
+
 		}
 		
 		// mul
 		for(int i = 0; i < 3; i++) {
 			if(mulReserv.reservationStation[i].isRun == true && mulReserv.reservationStation[i].time == 0) {
+				
+				if(mulFunc.busySize == mulFunc.totalSize) {
+					int readyRun = -1;
+					int readyRunIndex = 10086;
+					for(int j = 0; j < 3; j++) {
+						if(readyToRun(mulReserv.reservationStation[j])) {
+							if(mulReserv.reservationStation[j].instrIndex < readyRunIndex) {
+								readyRun = j;
+								readyRunIndex = mulReserv.reservationStation[j].instrIndex;
+							}
+						}
+					}
+					
+					// find one
+					if(readyRun != -1 && instructions.instruction[mulReserv.reservationStation[readyRun].instrIndex].issueClock +1 != currentInstr) {
+						mulReserv.reservationStation[readyRun].isRun = true;
+						mulFunc.busySize++;
+					}
+				}
+				
+				
+				
 				// need to write back
 
 				// inst
@@ -757,11 +807,35 @@ public class Simulator {
 		}
 		
 		// load
+		loadReserv.checkReserv();
+		
 		for(int i = 0; i < 3; i++) {
 			if(loadReserv.reservationStation[i].isRun == true && loadReserv.reservationStation[i].time == 0) {
+				System.out.println("WB:" + i);
+				if(loadFunc.busySize == loadFunc.totalSize) {
+					int readyRun = -1;
+					int readyRunIndex = 10086;
+					for(int j = 0; j < 3; j++) {
+						if(loadReserv.reservationStation[j].isBusy == true && loadReserv.reservationStation[j].isRun == false) {
+							if(loadReserv.reservationStation[j].instrIndex < readyRunIndex) {
+								System.out.println("find ready Run:" + j);
+								readyRun = j;
+								readyRunIndex = loadReserv.reservationStation[j].instrIndex;
+							}
+						}
+					}
+					
+					// find one
+					if(readyRun != -1 && instructions.instruction[loadReserv.reservationStation[readyRun].instrIndex].issueClock + 1 != currentInstr) {
+						loadReserv.reservationStation[readyRun].isRun = true;
+						loadFunc.busySize++;
+					}
+				}
+				
 				// need to write back
 
 				// inst
+				System.out.println("WB222:" + i);
 				if(instructions.instruction[loadReserv.reservationStation[i].instrIndex].writeResultClock == -1) {
 					instructions.instruction[loadReserv.reservationStation[i].instrIndex].writeResultClock = clock;
 				}
@@ -784,8 +858,6 @@ public class Simulator {
 				updateReservationSta(ind, i - 12, reg.tempCount - 1);
 			}
 		}
-		
-		
 		
 	}
 	
@@ -822,6 +894,7 @@ public class Simulator {
 					reg.tempReg[reg.tempCount] = 1;
 					mulReserv.reservationStation[i].V[1] = reg.tempCount;
 					mulReserv.reservationStation[i].Q[1] = 0;
+					mulReserv.reservationStation[i].time = 1;
 					reg.tempCount++;
 				}
 				else {
@@ -1043,31 +1116,31 @@ public class Simulator {
 	}
 	
 	
-	void printSta() {
-		addReserv.checkReserv();
-//		mulReserv.checkReserv();
-//		loadReserv.checkReserv();
-	}
-	
-	void printFunc() {
-		addFunc.checkFunc();
-//		mulFunc.checkFunc();
-//		loadFunc.checkFunc();
-	}
-	
-	void printAll() {
-		instructions.checkInstr();
-		printSta();
-		reg.checkFu();
-		printFunc();
-	}
-	
-	void printJump() {
-		System.out.println("waitJump:" + waitJump);
-//		System.out.println("isJump:" + isJump);
-//		System.out.println("jumpTime:" + jumpTime);
-//		System.out.println("jumpIndex:" + jumpIndex);
-//		System.out.println("jumpV:" + jumpV);
-//		System.out.println("jumpQ:" + jumpQ);
-	}
+//	void printSta() {
+//		addReserv.checkReserv();
+////		mulReserv.checkReserv();
+////		loadReserv.checkReserv();
+//	}
+//	
+//	void printFunc() {
+//		addFunc.checkFunc();
+////		mulFunc.checkFunc();
+////		loadFunc.checkFunc();
+//	}
+//	
+//	void printAll() {
+//		instructions.checkInstr();
+//		printSta();
+//		reg.checkFu();
+//		printFunc();
+//	}
+//	
+//	void printJump() {
+//		System.out.println("waitJump:" + waitJump);
+////		System.out.println("isJump:" + isJump);
+////		System.out.println("jumpTime:" + jumpTime);
+////		System.out.println("jumpIndex:" + jumpIndex);
+////		System.out.println("jumpV:" + jumpV);
+////		System.out.println("jumpQ:" + jumpQ);
+//	}
 }
