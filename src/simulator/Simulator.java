@@ -350,11 +350,13 @@ public class Simulator {
 	// ×¢Òâ³ý·¨³ý0
 	public void runSimulator() {
 		clearAll();
-		while((currentInstr < instructions.instrSize || emptyReservationSta() == false) && clock < 20) {
+		while((currentInstr < instructions.instrSize || emptyReservationSta() == false)) {
 			System.out.println("runSimulator now is " + this.clock);
 			System.out.println("currentInstr now is " + this.currentInstr);
 			System.out.println("emptyReservationSta() now is" + emptyReservationSta());
 			System.out.println(addReserv.busySize + " "+ mulReserv.busySize + " "+loadReserv.busySize);
+			
+			WriteBack();
 			if(currentInstr < instructions.instrSize) {
 				int currentInstrType = instructions.instruction[currentInstr].instrType;
 				boolean canIssue = tryIssue(currentInstrType);
@@ -373,7 +375,7 @@ public class Simulator {
 			// deal with the old instr  DO NOT FORGET JUMP
 			
 			// first check write back
-			WriteBack();
+//			WriteBack();
 			
 			// then update the info
 			// check RS to run
@@ -390,6 +392,10 @@ public class Simulator {
 		clearAll();
 		while((currentInstr < instructions.instrSize || emptyReservationSta() == false) && clock <= clk) {
 			System.out.println("runSimulator now is " + this.clock);
+			
+			WriteBack();
+			
+			
 			if(currentInstr < instructions.instrSize) {
 				int currentInstrType = instructions.instruction[currentInstr].instrType;
 				boolean canIssue = tryIssue(currentInstrType);
@@ -408,7 +414,7 @@ public class Simulator {
 			// deal with the old instr  DO NOT FORGET JUMP
 			
 			// first check write back
-			WriteBack();
+//			WriteBack();
 			
 			// then update the info
 			// check RS to run
@@ -699,7 +705,7 @@ public class Simulator {
 					}
 					
 					// find one
-					if(readyRun != -1 && instructions.instruction[addReserv.reservationStation[readyRun].instrIndex].issueClock +1 != currentInstr) {
+					if(readyRun != -1) {
 						addReserv.reservationStation[readyRun].isRun = true;
 						addFunc.busySize++;
 					}
@@ -766,7 +772,7 @@ public class Simulator {
 					}
 					
 					// find one
-					if(readyRun != -1 && instructions.instruction[mulReserv.reservationStation[readyRun].instrIndex].issueClock +1 != currentInstr) {
+					if(readyRun != -1) {
 						mulReserv.reservationStation[readyRun].isRun = true;
 						mulFunc.busySize++;
 					}
@@ -812,6 +818,7 @@ public class Simulator {
 		for(int i = 0; i < 3; i++) {
 			if(loadReserv.reservationStation[i].isRun == true && loadReserv.reservationStation[i].time == 0) {
 				System.out.println("WB:" + i);
+				System.out.println(loadFunc.busySize + " " + loadFunc.totalSize);
 				if(loadFunc.busySize == loadFunc.totalSize) {
 					int readyRun = -1;
 					int readyRunIndex = 10086;
@@ -826,7 +833,7 @@ public class Simulator {
 					}
 					
 					// find one
-					if(readyRun != -1 && instructions.instruction[loadReserv.reservationStation[readyRun].instrIndex].issueClock + 1 != currentInstr) {
+					if(readyRun != -1) {
 						loadReserv.reservationStation[readyRun].isRun = true;
 						loadFunc.busySize++;
 					}
@@ -923,7 +930,9 @@ public class Simulator {
 		case MUL:
 		case DIV:
 		case LD:
-			reg.fuValue[instructions.instruction[instrIndex].operand1] = tempIndex;
+			if(reg.fuState[instructions.instruction[instrIndex].operand1] == -10086) {
+				reg.fuValue[instructions.instruction[instrIndex].operand1] = tempIndex;
+			}
 			break;
 		case JUMP:
 			break;
@@ -1070,35 +1079,35 @@ public class Simulator {
 		return false;
 	}
 	
-	void updateFunc() {
-		int co = 0;
-		
-		// add
-		for(int i = 0; i < 6; i++) {
-			if(addReserv.reservationStation[i].isBusy && addReserv.reservationStation[i].isRun) {
-				co++;
-			}
-		}
-		addFunc.busySize = co;
-		
-		// mul
-		co = 0;
-		for(int i = 0; i < 3; i++) {
-			if(mulReserv.reservationStation[i].isBusy && mulReserv.reservationStation[i].isRun) {
-				co++;
-			}
-		}
-		mulFunc.busySize = co;
-		
-		// load
-		co = 0;
-		for(int i = 0; i < 3; i++) {
-			if(loadReserv.reservationStation[i].isBusy && loadReserv.reservationStation[i].isRun) {
-				co++;
-			}
-		}
-		loadFunc.busySize = co;
-	}
+//	void updateFunc() {
+//		int co = 0;
+//		
+//		// add
+//		for(int i = 0; i < 6; i++) {
+//			if(addReserv.reservationStation[i].isBusy && addReserv.reservationStation[i].isRun) {
+//				co++;
+//			}
+//		}
+//		addFunc.busySize = co;
+//		
+//		// mul
+//		co = 0;
+//		for(int i = 0; i < 3; i++) {
+//			if(mulReserv.reservationStation[i].isBusy && mulReserv.reservationStation[i].isRun) {
+//				co++;
+//			}
+//		}
+//		mulFunc.busySize = co;
+//		
+//		// load
+//		co = 0;
+//		for(int i = 0; i < 3; i++) {
+//			if(loadReserv.reservationStation[i].isBusy && loadReserv.reservationStation[i].isRun) {
+//				co++;
+//			}
+//		}
+//		loadFunc.busySize = co;
+//	}
 	
 	void clearAll() {
 		currentInstr = 0;

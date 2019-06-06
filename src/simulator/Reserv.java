@@ -34,6 +34,10 @@ public class Reserv {
     public static final int MUL = 4;
     public static final int DIV = 5;
     
+    public static final int ADDI = 7;
+    public static final int SUBI = 8;
+    public static final int NOP = 9;
+    
     Reserv(){
     	isBusy = false;
     	isRun = false;

@@ -1,12 +1,27 @@
 package simulator;
 
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.UIManager;
 
+import org.jvnet.substance.SubstanceLookAndFeel;
+import org.jvnet.substance.theme.SubstanceTerracottaTheme;
 
 public class Main {
 	public static void main(String[] args)
 	{
 		UI myUI = new UI();
 		myUI.initUI();
+		
+		
+
+
+		
+		
+		
+		
+		
+		
 //		Simulator simu = new Simulator();
 //		simu.readFileByLines(simu.fileName);
 //		simu.runSimulator();

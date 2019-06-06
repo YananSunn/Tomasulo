@@ -2,5 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="D:/download/jar/Java窗口美化包(substance和JTattoo)/JTattoo.jar"/>
+	<classpathentry kind="lib" path="D:/download/jar/Java窗口美化包(substance和JTattoo)/substance.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

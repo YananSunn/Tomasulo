@@ -16,17 +16,33 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Font;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
+
+import org.jvnet.substance.SubstanceLookAndFeel;
+import org.jvnet.substance.border.StandardBorderPainter;
+import org.jvnet.substance.button.ClassicButtonShaper;
+import org.jvnet.substance.button.StandardButtonShaper;
+import org.jvnet.substance.painter.StandardGradientPainter;
+import org.jvnet.substance.skin.EmeraldDuskSkin;
+import org.jvnet.substance.skin.SubstanceBusinessBlackSteelLookAndFeel;
+import org.jvnet.substance.theme.SubstanceBottleGreenTheme;
+import org.jvnet.substance.theme.SubstanceTerracottaTheme;
+import org.jvnet.substance.title.MatteHeaderPainter;
+import org.jvnet.substance.watermark.SubstanceBubblesWatermark;
+import org.jvnet.substance.watermark.SubstanceStripeWatermark;
 
 
 
@@ -48,6 +64,7 @@ public class UIPanel extends JFrame {
 	
 	JButton runSimu;
 	JButton file;
+	JButton uiStyle;
 	
 	
 	JLabel instr;
@@ -66,6 +83,8 @@ public class UIPanel extends JFrame {
 	int checkClock;
 	int checkInstr;
 	boolean illegal;
+	
+	int style;
 	
 	
 	Simulator sim;
@@ -91,6 +110,51 @@ public class UIPanel extends JFrame {
     public static final int DIV = 5;
 	
 	UIPanel(){
+		style = 0;
+		try {
+			UIManager.setLookAndFeel(new SubstanceBusinessBlackSteelLookAndFeel());  
+            JFrame.setDefaultLookAndFeelDecorated(true);  
+            //设置主题   
+            SubstanceLookAndFeel.setCurrentTheme("org.jvnet.substance.theme.SubstanceSepiaTheme");  
+            //设置按钮外观  
+            SubstanceLookAndFeel.setCurrentButtonShaper(new StandardButtonShaper()); //设置水印  
+            SubstanceLookAndFeel.setCurrentWatermark(new SubstanceStripeWatermark());  
+            //设置边框  
+            SubstanceLookAndFeel.setCurrentBorderPainter(new StandardBorderPainter());  
+            //设置渐变渲染  
+            SubstanceLookAndFeel.setCurrentGradientPainter(new StandardGradientPainter());  
+            //设置标题  
+            SubstanceLookAndFeel.setCurrentTitlePainter(new MatteHeaderPainter()); 
+            
+			
+			
+            
+//            UIManager.setLookAndFeel(new SubstanceLookAndFeel());
+//            JFrame.setDefaultLookAndFeelDecorated(true);
+//            JDialog.setDefaultLookAndFeelDecorated(true);
+//            SubstanceLookAndFeel.setCurrentTheme(new SubstanceTerracottaTheme());
+//            SubstanceLookAndFeel.setSkin(new EmeraldDuskSkin());
+//            SubstanceLookAndFeel.setCurrentButtonShaper(new ClassicButtonShaper());
+//            SubstanceLookAndFeel.setCurrentWatermark(new SubstanceBubblesWatermark());
+//            SubstanceLookAndFeel.setCurrentBorderPainter(new StandardBorderPainter());
+//            SubstanceLookAndFeel.setCurrentGradientPainter(new StandardGradientPainter());
+
+//            SubstanceLookAndFeel.setCurrentTheme("org.jvnet.substance.theme.SubstanceSepiaTheme");
+//            SubstanceLookAndFeel.setCurrentTheme("org.jvnet.substance.theme.SubstanceDarkVioletTheme");
+//            SubstanceLookAndFeel.setCurrentTheme("org.jvnet.substance.theme.SubstanceSteelBlueTheme");
+//            SubstanceLookAndFeel.setCurrentTheme("org.jvnet.substance.theme.SubstanceTheme$16");
+
+//            UIManager.setLookAndFeel("org.jvnet.substance.skin.SubstanceBusinessBlackSteelLookAndFeel");
+//			UIManager.setLookAndFeel("org.jvnet.substance.skin.SubstanceBusinessLookAndFeel");
+//			UIManager.setLookAndFeel("org.jvnet.substance.skin.SubstanceOfficeSilver2007LookAndFeel");
+//			UIManager.setLookAndFeel("org.jvnet.substance.skin.SubstanceSaharaLookAndFeel");
+//			UIManager.setLookAndFeel("org.jvnet.substance.skin.SubstanceOfficeBlue2007LookAndFeel");
+           
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
+        } catch (Exception e) {
+            System.err.println("Something went wrong!");
+        }
 		
 		mainPanel = new JPanel();
 		// main
@@ -102,7 +166,7 @@ public class UIPanel extends JFrame {
 		
 		left = new JPanel();
 		right = new JPanel();
-		right.setPreferredSize(new Dimension(600, 900));
+		right.setPreferredSize(new Dimension(800, 1000));
 		mainPanel.add(left, BorderLayout.CENTER);
 		mainPanel.add(right, BorderLayout.EAST);
 		
@@ -114,64 +178,119 @@ public class UIPanel extends JFrame {
 		ltop = new JPanel();
 		lcenter = new JPanel();
 		ldown = new JPanel();
-		ltop.setPreferredSize(new Dimension(600, 300));
-		ldown.setPreferredSize(new Dimension(600, 450));
+		
+
+		
+		ltop.setPreferredSize(new Dimension(900, 300));
+		ldown.setPreferredSize(new Dimension(900, 450));
 		
 		left.add(ltop, BorderLayout.NORTH);
 		left.add(lcenter, BorderLayout.CENTER);
 		left.add(ldown, BorderLayout.SOUTH);
 		
-		clockMes = new JLabel("CLOCK:");
-		instrMes = new JLabel("INSTRUCTION:");
-		clockTex = new JTextField();
-		instrTex = new JTextField();
+		clockMes = new JLabel("CLOCK:", JLabel.CENTER);
+		instrMes = new JLabel("INSTRU:", JLabel.CENTER);
+		clockTex = new JTextField(JTextField.CENTER);
+		instrTex = new JTextField(JTextField.CENTER);
 		runSimu = new JButton("run");
 		file = new JButton("open");
+		uiStyle = new JButton("style");
+		
+		runSimu.setPreferredSize(new Dimension(30,20));
+		file.setPreferredSize(new Dimension(30,20));
+		uiStyle.setPreferredSize(new Dimension(30,20));
 		
 		ltop.setBorder(new EmptyBorder(30,30,30,30));
-		ltop.setLayout(new GridLayout(4,1,0,5));
+		ltop.setLayout(new GridLayout(3,1,0,0));
+		
+		warning = new JLabel("Warning", JLabel.CENTER);
+		ltop.add(warning);
+		
+		
 		JPanel tmp3 = new JPanel();
-		tmp3.setLayout(new GridLayout(1,2,30,0));
+		tmp3.setLayout(new GridLayout(1,3,80,0));
 
 		
 		tmp3.add(file);
 		tmp3.add(runSimu);
+		tmp3.add(uiStyle);
+		tmp3.setBorder(new EmptyBorder(0, 80, 50, 80));
 		ltop.add(tmp3);
 
-		warning = new JLabel("Warning");
-		ltop.add(warning);
+		
+		
+		JPanel tmp4 = new JPanel();
+		tmp4.setLayout(new GridLayout(1,2,20,0));
 		
 		JPanel tmp = new JPanel();
-		tmp.setLayout(new GridLayout(1,2,30,0));
+		tmp.setLayout(new GridLayout(1,2,0,30));
 		tmp.add(clockMes);
 		tmp.add(clockTex);
-		ltop.add(tmp);
+		tmp.setBorder(new EmptyBorder(10, 0, 10, 10));
+		
+		tmp4.add(tmp);
+		
 		JPanel tmp2 = new JPanel();
-		tmp2.setLayout(new GridLayout(1,2,30,0));
+		tmp2.setLayout(new GridLayout(1,2,0,30));
 		tmp2.add(instrMes);
 		tmp2.add(instrTex);
-		ltop.add(tmp2);
+		tmp2.setBorder(new EmptyBorder(10, 10, 10, 0));
+		
+		tmp4.add(tmp2);
+		tmp4.setBorder(new EmptyBorder(0, 30, 40, 80));
+		
+				
+		ltop.add(tmp4);
 		
 		
+		JPanel tmp5 = new JPanel();
+		tmp5.setLayout(new GridLayout(1,6));
 		
-		instr = new JLabel();
+		JLabel emptyLabel1 = new JLabel();
+		JLabel emptyLabel2 = new JLabel();
+		JLabel emptyLabel3 = new JLabel();
+		
+		instr = new JLabel("", JLabel.CENTER);
 		instrForm = new JLabel[6];
 		for(int i = 0; i < 6; i++) {
-			instrForm[i] = new JLabel();
+			instrForm[i] = new JLabel("", JLabel.CENTER);
 		}
 		instrForm[0].setText("Issue");
 		instrForm[1].setText("Exec Comp");
 		instrForm[2].setText("Write Result");
 		
-		lcenter.setLayout(new GridLayout(1,2));
-		lcenter.add(instr);
-		
-		JPanel form = new JPanel();
-		form.setLayout(new GridLayout(2,3,5,5));
-		for(int i = 0; i < 6; i++) {
-			form.add(instrForm[i]);
+		tmp5.add(emptyLabel1);
+		tmp5.add(emptyLabel2);
+		tmp5.add(emptyLabel3);
+		for(int i = 0; i < 3; i++) {
+			tmp5.add(instrForm[i]);
 		}
-		lcenter.add(form);
+		
+		ltop.add(tmp5);
+		
+		JPanel tmp6 = new JPanel();
+		tmp6.setLayout(new BorderLayout());
+		instr.setPreferredSize(new Dimension(350,300));
+		tmp6.add(instr, BorderLayout.WEST);
+		
+		JPanel tmp7 = new JPanel();
+		tmp7.setLayout(new GridLayout(1,3));
+		for(int i = 3; i < 6; i++) {
+			tmp7.add(instrForm[i]);
+		}
+		tmp6.add(tmp7, BorderLayout.CENTER);
+		ltop.add(tmp6);
+		
+		tmp5.setOpaque(false);
+		tmp6.setOpaque(false);
+		tmp7.setOpaque(false);
+		
+
+		
+		lcenter.setLayout(new GridLayout(2,1,0,0));
+		lcenter.add(tmp5);
+		lcenter.add(tmp6);
+		
 		
 		
 		ldown.setLayout(new GridLayout(12,8,5,5));
@@ -179,9 +298,9 @@ public class UIPanel extends JFrame {
 		F = new JLabel[32];
 		FValue = new JLabel[32];
 		for(int i = 0; i < 32; i++) {
-			FU[i] = new JLabel("F" + i);
-			F[i] = new JLabel(String.valueOf(i));
-			FValue[i] = new JLabel(String.valueOf(i+32));
+			FU[i] = new JLabel("F" + i, JLabel.CENTER);
+			F[i] = new JLabel("", JLabel.CENTER);
+			FValue[i] = new JLabel("", JLabel.CENTER);
 		}
 		
 		for(int i = 0; i < 4; i++) {
@@ -198,21 +317,21 @@ public class UIPanel extends JFrame {
 		
 		
 		Resver = new JLabel[10];
-		Resver[0] = new JLabel();
-		Resver[1] = new JLabel("isBusy");
-		Resver[2] = new JLabel("isRun");
-		Resver[3] = new JLabel("Time");
-		Resver[4] = new JLabel("Op");
-		Resver[5] = new JLabel("Vj");
-		Resver[6] = new JLabel("Vk");
-		Resver[7] = new JLabel("Qj");
-		Resver[8] = new JLabel("Qk");
-		Resver[9] = new JLabel("addr");
+		Resver[0] = new JLabel("", JLabel.CENTER);
+		Resver[1] = new JLabel("isBusy", JLabel.CENTER);
+		Resver[2] = new JLabel("isRun", JLabel.CENTER);
+		Resver[3] = new JLabel("Time", JLabel.CENTER);
+		Resver[4] = new JLabel("Op", JLabel.CENTER);
+		Resver[5] = new JLabel("Vj", JLabel.CENTER);
+		Resver[6] = new JLabel("Vk", JLabel.CENTER);
+		Resver[7] = new JLabel("Qj", JLabel.CENTER);
+		Resver[8] = new JLabel("Qk", JLabel.CENTER);
+		Resver[9] = new JLabel("addr", JLabel.CENTER);
 		
 		addRes = new JLabel[6][10];
 		for(int i = 0; i < 6; i++) {
 			for(int j = 0; j < 10; j++) {
-				addRes[i][j] = new JLabel();
+				addRes[i][j] = new JLabel("", JLabel.CENTER);
 			}
 			addRes[i][0].setText("add" + String.valueOf(i+1));
 		}
@@ -220,7 +339,7 @@ public class UIPanel extends JFrame {
 		mulRes = new JLabel[3][10];
 		for(int i = 0; i < 3; i++) {
 			for(int j = 0; j < 10; j++) {
-				mulRes[i][j] = new JLabel();
+				mulRes[i][j] = new JLabel("", JLabel.CENTER);
 			}
 			mulRes[i][0].setText("mul" + String.valueOf(i+1));
 		}
@@ -228,13 +347,10 @@ public class UIPanel extends JFrame {
 		loadRes = new JLabel[3][10];
 		for(int i = 0; i < 3; i++) {
 			for(int j = 0; j < 10; j++) {
-				loadRes[i][j] = new JLabel();
+				loadRes[i][j] = new JLabel("", JLabel.CENTER);
 			}
 			loadRes[i][0].setText("load" + String.valueOf(i+1));
 		}
-		
-//		loadRes[0][3].setBackground(Color.PINK);
-//		loadRes[0][3].setOpaque(true);
 		
 		right.setLayout(new GridLayout(13,10,5,5));
 		for(int i = 0; i < 10; i++) {
@@ -256,11 +372,23 @@ public class UIPanel extends JFrame {
 			}
 		}
 		
+		setMyFont();
 		
-//		right.setBackground(Color.GREEN);
-//		ltop.setBackground(Color.BLACK);
-//		lcenter.setBackground(Color.BLUE);
-//		ldown.setBackground(Color.GRAY);
+//		ltop.setBorder(new EmptyBorder(20, 20, 20, 20));
+		
+		
+		ltop.setBorder(BorderFactory.createLineBorder(new Color(125,204,209), 3, true));
+		 
+		lcenter.setBorder(new EmptyBorder(20, 20, 20, 20));
+		ldown.setBorder(new EmptyBorder(20, 20, 20, 20));
+		
+		left.setBorder(new EmptyBorder(20, 20, 20, 20));
+		right.setBorder(new EmptyBorder(20, 20, 20, 20));
+		
+		
+//		ltop.setBackground(Color.black);
+//		lcenter.setBackground(Color.blue);
+//		ldown.setBackground(Color.green);
 
 		
         this.add(mainPanel);
@@ -361,7 +489,6 @@ public class UIPanel extends JFrame {
 							}
 						}
 						else {
-							System.out.println("heeeeeeeeeeeeeere");
 							checkInstr = -1;
 						}
 					}catch(NumberFormatException ex){
@@ -390,7 +517,110 @@ public class UIPanel extends JFrame {
 			}
 		});
 		
+		uiStyle.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				changeStyle();
+			}
+		});
 		
+		
+	}
+	
+	public void changeStyle() {
+		style = (style+1) % 3;
+		switch(style) {
+		case 0:
+			try {
+				UIManager.setLookAndFeel(new SubstanceBusinessBlackSteelLookAndFeel());    
+	            //设置主题   
+	            SubstanceLookAndFeel.setCurrentTheme("org.jvnet.substance.theme.SubstanceSepiaTheme");  
+	            //设置按钮外观  
+	            SubstanceLookAndFeel.setCurrentButtonShaper(new StandardButtonShaper()); //设置水印  
+	            SubstanceLookAndFeel.setCurrentWatermark(new SubstanceStripeWatermark());  
+	            //设置边框  
+	            SubstanceLookAndFeel.setCurrentBorderPainter(new StandardBorderPainter());  
+	            //设置渐变渲染  
+	            SubstanceLookAndFeel.setCurrentGradientPainter(new StandardGradientPainter());  
+	            //设置标题  
+	            SubstanceLookAndFeel.setCurrentTitlePainter(new MatteHeaderPainter()); 
+	            ltop.setBorder(BorderFactory.createLineBorder(new Color(125,204,209), 3, true));
+	        } catch (Exception e) {
+	            System.err.println("Something went wrong!");
+	        }
+			break;
+		case 1:
+			try {
+				UIManager.setLookAndFeel(new SubstanceBusinessBlackSteelLookAndFeel());    
+	            SubstanceLookAndFeel.setCurrentTheme("org.jvnet.substance.theme.SubstanceDarkVioletTheme");
+	            ltop.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(206,120,235)));
+	        } catch (Exception e) {
+	            System.err.println("Something went wrong!");
+	        }
+			break;
+		case 2:
+			try {
+	            
+	            UIManager.setLookAndFeel(new SubstanceLookAndFeel());
+	            SubstanceLookAndFeel.setCurrentTheme(new SubstanceTerracottaTheme());
+	            SubstanceLookAndFeel.setSkin(new EmeraldDuskSkin());
+	            SubstanceLookAndFeel.setCurrentButtonShaper(new ClassicButtonShaper());
+	            SubstanceLookAndFeel.setCurrentWatermark(new SubstanceBubblesWatermark());
+	            SubstanceLookAndFeel.setCurrentBorderPainter(new StandardBorderPainter());
+	            SubstanceLookAndFeel.setCurrentGradientPainter(new StandardGradientPainter());
+	            ltop.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(124,173,152)));
+	        } catch (Exception e) {
+	            System.err.println("Something went wrong!");
+	        }
+			break;
+		}
+	}
+	
+	public void setMyFont() {
+		Font font1 = new Font("细明本",Font.PLAIN,20);
+		
+		clockMes.setFont(font1);
+		instrMes.setFont(font1);
+		warning.setFont(font1);
+		clockTex.setFont(font1);
+		instrTex.setFont(font1);
+		
+		runSimu.setFont(font1);
+		file.setFont(font1);
+		
+		
+		instr.setFont(font1);
+		
+		for(int i = 0; i < instrForm.length; i++) {
+			instrForm[i].setFont(font1);
+		}
+		for(int i = 0; i < FU.length; i++) {
+			FU[i].setFont(font1);
+		}
+		for(int i = 0; i < F.length; i++) {
+			F[i].setFont(font1);
+		}
+		for(int i = 0; i < FValue.length; i++) {
+			FValue[i].setFont(font1);
+		}
+		for(int i = 0; i < Resver.length; i++) {
+			Resver[i].setFont(font1);
+		}
+		
+		for(int i = 0; i < addRes.length; i++) {
+			for(int j = 0; j < addRes[i].length; j++) {
+				addRes[i][j].setFont(font1);
+			}
+		}
+		for(int i = 0; i < mulRes.length; i++) {
+			for(int j = 0; j < mulRes[i].length; j++) {
+				mulRes[i][j].setFont(font1);
+			}
+		}
+		for(int i = 0; i < loadRes.length; i++) {
+			for(int j = 0; j < loadRes[i].length; j++) {
+				loadRes[i][j].setFont(font1);
+			}
+		}
 	}
 	
 	public void updateUI() {
@@ -419,6 +649,8 @@ public class UIPanel extends JFrame {
 		if(checkClock != -1) {
 			clockTex.setText(String.valueOf(checkClock));
 		}
+		
+		
 		for(int i = 0; i < 32; i++) {
 			if(sim.reg.fuState[i] != -10086) {
 				F[i].setText(getState(sim.reg.fuState[i]));
@@ -428,32 +660,29 @@ public class UIPanel extends JFrame {
 			}
 			if(sim.reg.fuValue[i] != -10086) {
 				FValue[i].setText(decToHex(getValue(sim.reg.fuValue[i])));
+				if(F[i].getText() == "") {
+					F[i].setText(decToHex(getValue(sim.reg.fuValue[i])));
+				}
 			}
 			else {
 				FValue[i].setText("");
 			}
 		}
 		
+		
 		clearReForm();
 
-//	    Resver[0] = new JLabel();
-//		Resver[1] = new JLabel("isBusy");
-//		Resver[2] = new JLabel("isRun");
-//		Resver[3] = new JLabel("Time");
-//		Resver[4] = new JLabel("Op");
-//		Resver[5] = new JLabel("Vj");
-//		Resver[6] = new JLabel("Vk");
-//		Resver[7] = new JLabel("Qj");
-//		Resver[8] = new JLabel("Qk");
-//		Resver[9] = new JLabel("addr");
-//		JLabel[][] addRes;
-//		JLabel[][] mulRes;
-//		JLabel[][] loadRes;
 		
 		for(int i = 0; i < 6; i++) {
-			addRes[i][1].setText(String.valueOf(sim.addReserv.reservationStation[i].isBusy));
+//			addRes[i][1].setText(String.valueOf(sim.addReserv.reservationStation[i].isBusy));
 			if(sim.addReserv.reservationStation[i].isBusy) {
-				addRes[i][2].setText(String.valueOf(sim.addReserv.reservationStation[i].isRun));
+				addRes[i][1].setText("√");
+				if(sim.addReserv.reservationStation[i].isRun) {
+					addRes[i][2].setText("√");
+				}
+				else {
+					addRes[i][2].setText("×");
+				}
 				addRes[i][3].setText(String.valueOf(sim.addReserv.reservationStation[i].time));
 				addRes[i][4].setText(getOp(sim.addReserv.reservationStation[i].type));
 				if(sim.addReserv.reservationStation[i].V[0] >= 0) {
@@ -476,9 +705,15 @@ public class UIPanel extends JFrame {
 			}
 		}
 		for(int i = 0; i < 3; i++) {
-			mulRes[i][1].setText(String.valueOf(sim.mulReserv.reservationStation[i].isBusy));
+//			mulRes[i][1].setText(String.valueOf(sim.mulReserv.reservationStation[i].isBusy));
 			if(sim.mulReserv.reservationStation[i].isBusy) {
-				mulRes[i][2].setText(String.valueOf(sim.mulReserv.reservationStation[i].isRun));
+				mulRes[i][1].setText("√");
+				if(sim.mulReserv.reservationStation[i].isRun) {
+					mulRes[i][2].setText("√");
+				}
+				else {
+					mulRes[i][2].setText("×");
+				}
 				mulRes[i][3].setText(String.valueOf(sim.mulReserv.reservationStation[i].time));
 				mulRes[i][4].setText(getOp(sim.mulReserv.reservationStation[i].type));
 				if(sim.mulReserv.reservationStation[i].V[0] >= 0) {
@@ -501,9 +736,15 @@ public class UIPanel extends JFrame {
 			}
 		}
 		for(int i = 0; i < 3; i++) {
-			loadRes[i][1].setText(String.valueOf(sim.loadReserv.reservationStation[i].isBusy));
+//			loadRes[i][1].setText(String.valueOf(sim.loadReserv.reservationStation[i].isBusy));
 			if(sim.loadReserv.reservationStation[i].isBusy) {
-				loadRes[i][2].setText(String.valueOf(sim.loadReserv.reservationStation[i].isRun));
+				loadRes[i][1].setText("√");
+				if(sim.loadReserv.reservationStation[i].isRun) {
+					loadRes[i][2].setText("√");
+				}
+				else {
+					loadRes[i][2].setText("×");
+				}
 				loadRes[i][3].setText(String.valueOf(sim.loadReserv.reservationStation[i].time));
 				loadRes[i][9].setText(decToHex(sim.loadReserv.reservationStation[i].addr));
 			}
@@ -522,19 +763,19 @@ public class UIPanel extends JFrame {
 			for(int j = 1; j < 9; j++) {
 				addRes[i][j].setText("");
 			}
-			addRes[i][9].setText("x");
+			addRes[i][9].setText("×");
 		}
 		
 		for(int i = 0; i < 3; i++) {
 			for(int j = 1; j < 9; j++) {
 				mulRes[i][j].setText("");
 			}
-			mulRes[i][9].setText("x");
+			mulRes[i][9].setText("×");
 		}
 		
 		for(int i = 0; i < 3; i++) {
 			for(int j = 4; j < 9; j++) {
-				loadRes[i][j].setText("x");
+				loadRes[i][j].setText("×");
 			}
 			loadRes[i][1].setText("");
 			loadRes[i][2].setText("");
@@ -550,18 +791,6 @@ public class UIPanel extends JFrame {
 	}
 	
 	public String getState(int s) {
-//		public static final int ADD5 = -1;
-//		public static final int ADD4 = -2;
-//		public static final int ADD3 = -3;
-//		public static final int ADD2 = -4;
-//		public static final int ADD1 = -5;
-//		public static final int ADD0 = -6;
-//		public static final int MUL2 = -7;
-//		public static final int MUL1 = -8;
-//		public static final int MUL0 = -9;
-//		public static final int LOAD2 = -10;
-//		public static final int LOAD1 = -11;
-//		public static final int LOAD0 = -12;
 		String strState = "UNK";
 		switch(s) {
 		case ADD5:
@@ -609,12 +838,6 @@ public class UIPanel extends JFrame {
 	}
 	
 	public String getOp(int op) {
-//		public static final int LD = 0;
-//	    public static final int JUMP = 1;
-//	    public static final int ADD = 2;
-//	    public static final int SUB = 3;
-//	    public static final int MUL = 4;
-//	    public static final int DIV = 5;
 		String strOp = "UNKNOWN";
 		switch(op) {
 		case LD:
@@ -644,9 +867,8 @@ public class UIPanel extends JFrame {
 //    	this.setIconImage(icon.getImage());
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-//        this.setSize((int)(dim.width * 0.32), (int)(dim.height * 0.8));
-        this.setSize(1200, 900);
-        this.setLocation((int)(dim.width * 0.2), (int)(dim.height * 0.1));
+        this.setSize(1700, 1000);
+        this.setLocation((int)(dim.width * 0.1), (int)(dim.height * 0.05));
         this.setVisible(true);
     }
 }
