@@ -8,6 +8,14 @@ public class Instr {
     public static final int MUL = 4;
     public static final int DIV = 5;
     
+    public static final int ADDI = 7;
+    public static final int SUBI = 8;
+    public static final int NOP = 9;
+    public static final int SHL = 10; // Âß¼­×óÒÆ
+    public static final int SAL = 11; // ËãÊõ×óÒÆ(=SHL)
+    public static final int SHR = 12; // Âß¼­ÓÒÒÆ.( Ã¿Î»ÓÒÒÆ, µÍÎ»½ø CF, ¸ßÎ»²¹ 0)
+    public static final int SAR = 13; // ËãÊıÓÒÒÆ
+    
     int instrType;
     int operand1;
     int operand2;
@@ -21,6 +29,17 @@ public class Instr {
     
     Instr(){
     	instrType = -1;
+        operand1 = -1;
+        operand2 = -1;
+        operand3 = -1;
+        issueClock = -1;
+        execCompClock = -1;
+        writeResultClock = -1;
+        useReserv = 0;
+    }
+    
+    Instr(int type){
+    	instrType = type;
         operand1 = -1;
         operand2 = -1;
         operand3 = -1;

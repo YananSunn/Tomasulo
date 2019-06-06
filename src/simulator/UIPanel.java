@@ -108,6 +108,14 @@ public class UIPanel extends JFrame {
     public static final int SUB = 3;
     public static final int MUL = 4;
     public static final int DIV = 5;
+    
+    public static final int ADDI = 7;
+    public static final int SUBI = 8;
+    public static final int NOP = 9;
+    public static final int SHL = 10; // Âß¼­×óÒÆ
+    public static final int SAL = 11; // ËãÊõ×óÒÆ(=SHL)
+    public static final int SHR = 12; // Âß¼­ÓÒÒÆ.( Ã¿Î»ÓÒÒÆ, µÍÎ»½ø CF, ¸ßÎ»²¹ 0)
+    public static final int SAR = 13; // ËãÊýÓÒÒÆ
 	
 	UIPanel(){
 		style = 0;
@@ -633,11 +641,20 @@ public class UIPanel extends JFrame {
 			if(sim.instructions.instruction[checkInstr].issueClock != -1) {
 				instrForm[3].setText(String.valueOf(sim.instructions.instruction[checkInstr].issueClock));
 			}
+			else {
+				instrForm[3].setText("");
+			}
 			if(sim.instructions.instruction[checkInstr].execCompClock != -1) {
 				instrForm[4].setText(String.valueOf(sim.instructions.instruction[checkInstr].execCompClock));
 			}
+			else {
+				instrForm[4].setText("");
+			}
 			if(sim.instructions.instruction[checkInstr].writeResultClock != -1) {
 				instrForm[5].setText(String.valueOf(sim.instructions.instruction[checkInstr].writeResultClock));
+			}
+			else {
+				instrForm[5].setText("");
 			}
 		}
 		else {
@@ -685,17 +702,35 @@ public class UIPanel extends JFrame {
 				}
 				addRes[i][3].setText(String.valueOf(sim.addReserv.reservationStation[i].time));
 				addRes[i][4].setText(getOp(sim.addReserv.reservationStation[i].type));
-				if(sim.addReserv.reservationStation[i].V[0] >= 0) {
-					addRes[i][5].setText(decToHex(getValue(sim.addReserv.reservationStation[i].V[0])));
-				}
-				if(sim.addReserv.reservationStation[i].V[1] >= 0) {
-					addRes[i][6].setText(decToHex(getValue(sim.addReserv.reservationStation[i].V[1])));
-				}
-				if(sim.addReserv.reservationStation[i].Q[0] < 0) {
-					addRes[i][7].setText(getState(sim.addReserv.reservationStation[i].Q[0]));
-				}
-				if(sim.addReserv.reservationStation[i].Q[1] < 0) {
-					addRes[i][8].setText(getState(sim.addReserv.reservationStation[i].Q[1]));
+				switch(sim.addReserv.reservationStation[i].type) {
+				case ADD:
+				case SUB:
+					if(sim.addReserv.reservationStation[i].V[0] >= 0) {
+						addRes[i][5].setText(decToHex(getValue(sim.addReserv.reservationStation[i].V[0])));
+					}
+					if(sim.addReserv.reservationStation[i].V[1] >= 0) {
+						addRes[i][6].setText(decToHex(getValue(sim.addReserv.reservationStation[i].V[1])));
+					}
+					if(sim.addReserv.reservationStation[i].Q[0] < 0) {
+						addRes[i][7].setText(getState(sim.addReserv.reservationStation[i].Q[0]));
+					}
+					if(sim.addReserv.reservationStation[i].Q[1] < 0) {
+						addRes[i][8].setText(getState(sim.addReserv.reservationStation[i].Q[1]));
+					}
+					break;
+				case ADDI:
+				case SUBI:
+					if(sim.addReserv.reservationStation[i].V[0] >= 0) {
+						addRes[i][5].setText(decToHex(getValue(sim.addReserv.reservationStation[i].V[0])));
+					}
+					if(sim.addReserv.reservationStation[i].V[1] >= 0) {
+						addRes[i][6].setText(decToHex(sim.addReserv.reservationStation[i].V[1]));
+					}
+					if(sim.addReserv.reservationStation[i].Q[0] < 0) {
+						addRes[i][7].setText(getState(sim.addReserv.reservationStation[i].Q[0]));
+					}
+					
+					break;
 				}
 			}
 			else {
@@ -716,18 +751,39 @@ public class UIPanel extends JFrame {
 				}
 				mulRes[i][3].setText(String.valueOf(sim.mulReserv.reservationStation[i].time));
 				mulRes[i][4].setText(getOp(sim.mulReserv.reservationStation[i].type));
-				if(sim.mulReserv.reservationStation[i].V[0] >= 0) {
-					mulRes[i][5].setText(decToHex(getValue(sim.mulReserv.reservationStation[i].V[0])));
+				
+				switch(sim.mulReserv.reservationStation[i].type) {
+				case MUL:
+				case DIV:
+					if(sim.mulReserv.reservationStation[i].V[0] >= 0) {
+						mulRes[i][5].setText(decToHex(getValue(sim.mulReserv.reservationStation[i].V[0])));
+					}
+					if(sim.mulReserv.reservationStation[i].V[1] >= 0) {
+						mulRes[i][6].setText(decToHex(getValue(sim.mulReserv.reservationStation[i].V[1])));
+					}
+					if(sim.mulReserv.reservationStation[i].Q[0] < 0) {
+						mulRes[i][7].setText(getState(sim.mulReserv.reservationStation[i].Q[0]));
+					}
+					if(sim.mulReserv.reservationStation[i].Q[1] < 0) {
+						mulRes[i][8].setText(getState(sim.mulReserv.reservationStation[i].Q[1]));
+					}
+					break;
+				case SHL:
+				case SAL:
+				case SHR:
+				case SAR:
+					if(sim.mulReserv.reservationStation[i].V[0] >= 0) {
+						mulRes[i][5].setText(decToHex(getValue(sim.mulReserv.reservationStation[i].V[0])));
+					}
+					if(sim.mulReserv.reservationStation[i].V[1] >= 0) {
+						mulRes[i][6].setText(decToHex(sim.mulReserv.reservationStation[i].V[1]));
+					}
+					if(sim.mulReserv.reservationStation[i].Q[0] < 0) {
+						mulRes[i][7].setText(getState(sim.mulReserv.reservationStation[i].Q[0]));
+					}
+					break;
 				}
-				if(sim.mulReserv.reservationStation[i].V[1] >= 0) {
-					mulRes[i][6].setText(decToHex(getValue(sim.mulReserv.reservationStation[i].V[1])));
-				}
-				if(sim.mulReserv.reservationStation[i].Q[0] < 0) {
-					mulRes[i][7].setText(getState(sim.mulReserv.reservationStation[i].Q[0]));
-				}
-				if(sim.mulReserv.reservationStation[i].Q[1] < 0) {
-					mulRes[i][8].setText(getState(sim.mulReserv.reservationStation[i].Q[1]));
-				}			
+							
 			}
 			else {
 				for(int j = 2; j < 9; j++) {
@@ -849,14 +905,32 @@ public class UIPanel extends JFrame {
 		case ADD:
 			strOp = "ADD";
 			break;
+		case ADDI:
+			strOp = "ADDI";
+			break;
 		case SUB:
 			strOp = "SUB";
+			break;
+		case SUBI:
+			strOp = "SUBI";
 			break;
 		case MUL:
 			strOp = "MUL";
 			break;
 		case DIV:
 			strOp = "DIV";
+			break;
+		case SHL:
+			strOp = "SHL";
+			break;
+		case SAL:
+			strOp = "SAL";
+			break;
+		case SHR:
+			strOp = "SHR";
+			break;
+		case SAR:
+			strOp = "SAR";
 			break;
 		}
 		return strOp;

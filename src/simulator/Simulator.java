@@ -37,6 +37,17 @@ public class Simulator {
     public static final int MUL = 4;
     public static final int DIV = 5;
     
+    // ADDI/SUBI Fdst Fsrc 0x?
+    public static final int ADDI = 7;
+    public static final int SUBI = 8;
+    public static final int NOP = 9;
+    
+    // SXX Fdst Fsrc 0x? 将Fx中的数据进行？移位
+    public static final int SHL = 10; // 逻辑左移
+    public static final int SAL = 11; // 算术左移(=SHL)
+    public static final int SHR = 12; // 逻辑右移.( 每位右移, 低位进 CF, 高位补 0)
+    public static final int SAR = 13; // 算数右移
+    
     public static final int ADDTIME = 3;
     public static final int LDTIME = 3;
     public static final int JUMPTIME = 1;
@@ -45,6 +56,8 @@ public class Simulator {
     
     public static final int DIVTIME = 4;
     public static final int MULTIME = 4;
+    
+    public static final int STIME = 3;
     
 	Simulator(){
 		fileName = "test1.nel";
@@ -98,14 +111,23 @@ public class Simulator {
             while ((tempString = reader.readLine()) != null) {  
                 // 显示行号  
 //                System.out.println("line " + line + ": " + tempString);  
+            	if(tempString.length() == 0) {
+            		break;
+            	}
                 
             	instructions.instructionsString[line] = new String(tempString);
             	
                 String tempType = "";
                 int count = 0;
-                while(tempString.charAt(count) != ',') {
-                	tempType += tempString.charAt(count);
-                	count++;
+                System.out.println(tempString);
+                if(tempString.equals("NOP")) {
+                	tempType = "NOP";
+                }
+                else {
+                	while(tempString.charAt(count) != ',') {
+                    	tempType += tempString.charAt(count);
+                    	count++;
+                    }
                 }
 //                System.out.println("tempType " + tempType ); 
                 count++;
@@ -124,7 +146,7 @@ public class Simulator {
                     	tempOp += tempString.charAt(count);
                     	count++;
                     }
-                	op2 = dealComplement(tempOp);
+                	op2 = dealComplement(tempOp);              	
                 	instructions.instruction[line] = new Instr(LD, op1, op2);
                 }
                 else if(tempType.equals("JUMP")) {
@@ -152,7 +174,55 @@ public class Simulator {
                 	op3 = dealComplement(tempOp);
                 	instructions.instruction[line] = new Instr(JUMP, op1, op2, op3);
                 }
-                else {
+                else if(tempType.equals("NOP")) {
+                	instructions.instruction[line] = new Instr(NOP);
+                }
+                else if(tempType.equals("ADDI") || tempType.equals("SUBI")|| tempType.equals("SHL")  || tempType.equals("SAL")  || tempType.equals("SHR")  || tempType.equals("SAR")) {
+                	int op1, op2, op3;
+                	String tempOp = "";
+                	while(tempString.charAt(count) != ',') {
+                    	tempOp += tempString.charAt(count);
+                    	count++;
+                    }
+                	count++;
+                	op1 = dealRegister(tempOp);
+                	tempOp = "";
+                	System.out.println(tempString);
+                	while(tempString.charAt(count) != ',') {
+                    	tempOp += tempString.charAt(count);
+                    	count++;
+                    }
+                	count++;
+                	op2 = dealRegister(tempOp);
+                	tempOp = "";
+                	while(count < tempString.length()) {
+                    	tempOp += tempString.charAt(count);
+                    	count++;
+                    }
+                	op3 = dealComplement(tempOp);
+                	
+                	switch (tempType) {
+                	case "ADDI":
+                		instructions.instruction[line] = new Instr(ADDI, op1, op2, op3);
+                		break;
+                	case "SUBI":
+                		instructions.instruction[line] = new Instr(SUBI, op1, op2, op3);
+                		break;
+                	case "SHL":
+                		instructions.instruction[line] = new Instr(SHL, op1, op2, op3);
+                		break;
+                	case "SAL":
+                		instructions.instruction[line] = new Instr(SAL, op1, op2, op3);
+                		break;
+                	case "SHR":
+                		instructions.instruction[line] = new Instr(SHR, op1, op2, op3);
+                		break;
+                	case "SAR":
+                		instructions.instruction[line] = new Instr(SAR, op1, op2, op3);
+                		break;
+                	}
+                }
+                else{
 //                	System.out.println("other"); 
                 	int op1, op2, op3;
                 	String tempOp = "";
@@ -425,6 +495,8 @@ public class Simulator {
 			this.clock++;
 		}
 //		printAll();
+		System.out.println("++++++++++++++++++++++++++++++++++++++++++++++");
+		addReserv.checkReserv();
 		return clock-1;
 	}
 	
@@ -453,13 +525,20 @@ public class Simulator {
 			boolean canIssue = false;
 			switch (type) {
 			case ADD:
+			case ADDI:
 			case SUB:
+			case SUBI:
+			case JUMP:
 				if(this.addReserv.busySize < this.addReserv.totalSize) {
 					canIssue = true;
 				}
 				break;
 			case MUL:
 			case DIV:
+			case SHL:
+			case SAL:
+			case SHR:
+			case SAR:
 				if(this.mulReserv.busySize < this.mulReserv.totalSize) {
 					canIssue = true;
 				}
@@ -469,10 +548,8 @@ public class Simulator {
 					canIssue = true;
 				}
 				break;
-			case JUMP:
-				if(this.addReserv.busySize < this.addReserv.totalSize) {
-					canIssue = true;
-				}
+			case NOP:
+				canIssue = true;
 				break;
 			}
 			return canIssue;
@@ -490,45 +567,12 @@ public class Simulator {
 		int selectedRS = 0;
 		switch (type) {
 		case ADD:
-			while(this.addReserv.reservationStation[selectedRS].isBusy) {
-				selectedRS++;
-			}
-			System.out.println("ADD selectedRS:" + selectedRS);
-			
-			// deal with instr
-			if(this.instructions.instruction[this.currentInstr].issueClock == -1) {
-				this.instructions.instruction[this.currentInstr].issueClock = this.clock;
-			}
-			// deal with RS
-			// busy time run is useful   type V Q
-			this.addReserv.reservationStation[selectedRS].isBusy = true;
-			this.addReserv.busySize++;
-			this.addReserv.reservationStation[selectedRS].type = ADD;
-			this.addReserv.reservationStation[selectedRS].time = ADDTIME;
-			this.addReserv.reservationStation[selectedRS].instrIndex = currentInstr;
-			
-			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
-				this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
-			}
-			else {
-				this.addReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
-			}
-			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3] != -10086) {
-				this.addReserv.reservationStation[selectedRS].Q[1] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3];
-			}
-			else {
-				this.addReserv.reservationStation[selectedRS].V[1] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand3];
-			}
-			
-			// deal with reg
-			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 6;
-			
-			break;
+		case ADDI:
 		case SUB:
+		case SUBI:
 			while(this.addReserv.reservationStation[selectedRS].isBusy) {
 				selectedRS++;
 			}
-			System.out.println("SUB selectedRS:" + selectedRS);
 			
 			// deal with instr
 			if(this.instructions.instruction[this.currentInstr].issueClock == -1) {
@@ -538,66 +582,59 @@ public class Simulator {
 			// busy time run is useful   type V Q
 			this.addReserv.reservationStation[selectedRS].isBusy = true;
 			this.addReserv.busySize++;
-			this.addReserv.reservationStation[selectedRS].type = SUB;
 			this.addReserv.reservationStation[selectedRS].time = ADDTIME;
 			this.addReserv.reservationStation[selectedRS].instrIndex = currentInstr;
+			switch(type) {
+			case ADD:
+				this.addReserv.reservationStation[selectedRS].type = ADD;
+				break;
+			case SUB:
+				this.addReserv.reservationStation[selectedRS].type = SUB;
+				break;
+			case ADDI:
+				this.addReserv.reservationStation[selectedRS].type = ADDI;
+				break;
+			case SUBI:
+				this.addReserv.reservationStation[selectedRS].type = SUBI;
+				break;
+			}
 			
-			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
-				this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
-			}
-			else {
-				this.addReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
-			}
-			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3] != -10086) {
-				this.addReserv.reservationStation[selectedRS].Q[1] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3];
-			}
-			else {
-				this.addReserv.reservationStation[selectedRS].V[1] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand3];
+			switch(type) {
+			case ADD:
+			case SUB:
+				if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
+					this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
+				}
+				else {
+					this.addReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
+				}
+				if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3] != -10086) {
+					this.addReserv.reservationStation[selectedRS].Q[1] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3];
+				}
+				else {
+					this.addReserv.reservationStation[selectedRS].V[1] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand3];
+				}
+				break;
+			case ADDI:
+			case SUBI:
+				if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
+					this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
+				}
+				else {
+					this.addReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
+				}
+				this.addReserv.reservationStation[selectedRS].V[1] = this.instructions.instruction[this.currentInstr].operand3;
+				break;
 			}
 			
 			// deal with reg
 			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 6;
 			break;
 		case MUL:
-			while(this.mulReserv.reservationStation[selectedRS].isBusy) {
-				selectedRS++;
-			}
-			System.out.println("MUL selectedRS:" + selectedRS);
-			
-			// deal with instr
-			if(this.instructions.instruction[this.currentInstr].issueClock == -1) {
-				this.instructions.instruction[this.currentInstr].issueClock = this.clock;
-			}
-			// deal with RS
-			// busy time run is useful   type V Q
-			this.mulReserv.reservationStation[selectedRS].isBusy = true;
-			this.mulReserv.busySize++;
-			this.mulReserv.reservationStation[selectedRS].type = MUL;
-			this.mulReserv.reservationStation[selectedRS].time = MULTIME;
-			this.mulReserv.reservationStation[selectedRS].instrIndex = currentInstr;
-			
-			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
-				this.mulReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
-			}
-			else {
-				this.mulReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
-			}
-			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3] != -10086) {
-				this.mulReserv.reservationStation[selectedRS].Q[1] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3];
-			}
-			else {
-				this.mulReserv.reservationStation[selectedRS].V[1] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand3];
-			}
-			
-			// deal with reg
-			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 9;
-			
-			break;
 		case DIV:
 			while(this.mulReserv.reservationStation[selectedRS].isBusy) {
 				selectedRS++;
 			}
-			System.out.println("DIV selectedRS:" + selectedRS);
 			
 			// deal with instr
 			if(this.instructions.instruction[this.currentInstr].issueClock == -1) {
@@ -607,8 +644,18 @@ public class Simulator {
 			// busy time run is useful   type V Q
 			this.mulReserv.reservationStation[selectedRS].isBusy = true;
 			this.mulReserv.busySize++;
-			this.mulReserv.reservationStation[selectedRS].type = DIV;
-			this.mulReserv.reservationStation[selectedRS].time = DIVTIME;
+			
+			switch(type) {
+			case MUL:
+				this.mulReserv.reservationStation[selectedRS].type = MUL;
+				this.mulReserv.reservationStation[selectedRS].time = MULTIME;
+				break;
+			case DIV:
+				this.mulReserv.reservationStation[selectedRS].type = DIV;
+				this.mulReserv.reservationStation[selectedRS].time = DIVTIME;
+				break;
+			}
+			
 			this.mulReserv.reservationStation[selectedRS].instrIndex = currentInstr;
 			
 			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
@@ -625,8 +672,51 @@ public class Simulator {
 			}
 			
 			// deal with reg
-			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 9;
+			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 9;	
+			break;
+		case SHL:
+		case SAL:
+		case SHR:
+		case SAR:
+			while(this.mulReserv.reservationStation[selectedRS].isBusy) {
+				selectedRS++;
+			}
 			
+			// deal with instr
+			if(this.instructions.instruction[this.currentInstr].issueClock == -1) {
+				this.instructions.instruction[this.currentInstr].issueClock = this.clock;
+			}
+			// deal with RS
+			// busy time run is useful   type V Q
+			this.mulReserv.reservationStation[selectedRS].isBusy = true;
+			this.mulReserv.busySize++;
+			this.mulReserv.reservationStation[selectedRS].time = STIME;
+			switch(type) {
+			case SHL:
+				this.mulReserv.reservationStation[selectedRS].type = SHL;
+				break;
+			case SAL:
+				this.mulReserv.reservationStation[selectedRS].type = SAL;
+				break;
+			case SHR:
+				this.mulReserv.reservationStation[selectedRS].type = SHR;
+				break;
+			case SAR:
+				this.mulReserv.reservationStation[selectedRS].type = SAR;
+				break;
+			}
+			
+			this.mulReserv.reservationStation[selectedRS].instrIndex = currentInstr;
+			
+			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
+				this.mulReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
+			}
+			else {
+				this.mulReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
+			}
+			this.mulReserv.reservationStation[selectedRS].V[1] = this.instructions.instruction[this.currentInstr].operand3;
+			// deal with reg
+			this.reg.fuState[this.instructions.instruction[this.currentInstr].operand1] = selectedRS - 9;	
 			break;
 		case LD:
 			while(this.loadReserv.reservationStation[selectedRS].isBusy) {
@@ -683,6 +773,13 @@ public class Simulator {
 			this.addReserv.reservationStation[selectedRS].V[1] = currentInstr;
 			
 			break;
+		case NOP:
+			if(this.instructions.instruction[this.currentInstr].issueClock == -1) {
+				this.instructions.instruction[this.currentInstr].issueClock = this.clock;
+				this.instructions.instruction[this.currentInstr].execCompClock = this.clock;
+				this.instructions.instruction[this.currentInstr].writeResultClock = this.clock;
+			}
+			break;
 		}
 	}
 
@@ -724,8 +821,16 @@ public class Simulator {
 					reg.tempReg[reg.tempCount] = reg.tempReg[addReserv.reservationStation[i].V[0]] + reg.tempReg[addReserv.reservationStation[i].V[1]];
 					reg.tempCount++;
 					break;
+				case ADDI:
+					reg.tempReg[reg.tempCount] = reg.tempReg[addReserv.reservationStation[i].V[0]] + addReserv.reservationStation[i].V[1];
+					reg.tempCount++;
+					break;
 				case SUB:
 					reg.tempReg[reg.tempCount] = reg.tempReg[addReserv.reservationStation[i].V[0]] - reg.tempReg[addReserv.reservationStation[i].V[1]];
+					reg.tempCount++;
+					break;
+				case SUBI:
+					reg.tempReg[reg.tempCount] = reg.tempReg[addReserv.reservationStation[i].V[0]] - addReserv.reservationStation[i].V[1];
 					reg.tempCount++;
 					break;
 //				case JUMP:
@@ -797,6 +902,19 @@ public class Simulator {
 					reg.tempReg[reg.tempCount] = reg.tempReg[mulReserv.reservationStation[i].V[0]] / reg.tempReg[mulReserv.reservationStation[i].V[1]];
 					reg.tempCount++;
 					break;
+				case SHL:
+				case SAL:
+					reg.tempReg[reg.tempCount] = reg.tempReg[mulReserv.reservationStation[i].V[0]] << mulReserv.reservationStation[i].V[1];
+					reg.tempCount++;
+					break;
+				case SHR:
+					reg.tempReg[reg.tempCount] = reg.tempReg[mulReserv.reservationStation[i].V[0]] >>> mulReserv.reservationStation[i].V[1];
+					reg.tempCount++;
+					break;
+				case SAR:
+					reg.tempReg[reg.tempCount] = reg.tempReg[mulReserv.reservationStation[i].V[0]] >> mulReserv.reservationStation[i].V[1];
+					reg.tempCount++;
+					break;
 				}
 				// update FU
 //				reg.Fu[instructions.instruction[mulReserv.reservationStation[i].instrIndex].operand1] = reg.tempCount - 1;
@@ -817,8 +935,6 @@ public class Simulator {
 		
 		for(int i = 0; i < 3; i++) {
 			if(loadReserv.reservationStation[i].isRun == true && loadReserv.reservationStation[i].time == 0) {
-				System.out.println("WB:" + i);
-				System.out.println(loadFunc.busySize + " " + loadFunc.totalSize);
 				if(loadFunc.busySize == loadFunc.totalSize) {
 					int readyRun = -1;
 					int readyRunIndex = 10086;
@@ -842,7 +958,6 @@ public class Simulator {
 				// need to write back
 
 				// inst
-				System.out.println("WB222:" + i);
 				if(instructions.instruction[loadReserv.reservationStation[i].instrIndex].writeResultClock == -1) {
 					instructions.instruction[loadReserv.reservationStation[i].instrIndex].writeResultClock = clock;
 				}
@@ -867,6 +982,7 @@ public class Simulator {
 		}
 		
 	}
+	
 	
 	void updateReservationSta(int instrIndex, int writeBackId, int tempIndex) {
 		// add
@@ -926,10 +1042,16 @@ public class Simulator {
 		System.out.println(instrIndex);
 		switch(instructions.instruction[instrIndex].instrType) {
 		case ADD:
+		case ADDI:
 		case SUB:
+		case SUBI:
 		case MUL:
 		case DIV:
 		case LD:
+		case SHL:
+		case SAL:
+		case SHR:
+		case SAR:
 			if(reg.fuState[instructions.instruction[instrIndex].operand1] == -10086) {
 				reg.fuValue[instructions.instruction[instrIndex].operand1] = tempIndex;
 			}

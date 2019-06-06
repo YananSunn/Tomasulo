@@ -37,6 +37,10 @@ public class Reserv {
     public static final int ADDI = 7;
     public static final int SUBI = 8;
     public static final int NOP = 9;
+    public static final int SHL = 10; // Âß¼­×óÒÆ
+    public static final int SAL = 11; // ËãÊõ×óÒÆ(=SHL)
+    public static final int SHR = 12; // Âß¼­ÓÒÒÆ.( Ã¿Î»ÓÒÒÆ, µÍÎ»½ø CF, ¸ßÎ»²¹ 0)
+    public static final int SAR = 13; // ËãÊıÓÒÒÆ
     
     Reserv(){
     	isBusy = false;
