@@ -467,7 +467,7 @@ public class Simulator {
 			// then update the info
 			// check RS to run
 			ExecComp();
-			
+			updateReSize();
 //			WriteBack();
 		
 			this.clock++;
@@ -506,7 +506,7 @@ public class Simulator {
 			// then update the info
 			// check RS to run
 			ExecComp();
-			
+			updateReSize();
 //			WriteBack();
 		
 			this.clock++;
@@ -883,7 +883,7 @@ public class Simulator {
 				
 				// addReserv clear
 				addReserv.reservationStation[i].clearReserv();
-				addReserv.busySize--;
+//				addReserv.busySize--;
 				addFunc.busySize--;
 				
 				// update RS
@@ -961,7 +961,7 @@ public class Simulator {
 				
 				// addReserv clear
 				mulReserv.reservationStation[i].clearReserv();
-				mulReserv.busySize--;
+//				mulReserv.busySize--;
 				mulFunc.busySize--;
 				
 				// update RS
@@ -1016,7 +1016,7 @@ public class Simulator {
 				
 				// addReserv clear
 				loadReserv.reservationStation[i].clearReserv();
-				loadReserv.busySize--;
+//				loadReserv.busySize--;
 				loadFunc.busySize--;
 				
 				// update RS and FU
@@ -1025,6 +1025,37 @@ public class Simulator {
 		}
 		
 	}
+	
+	void updateReSize() {
+		int co = 0;
+		
+		// add
+		for(int i = 0; i < 6; i++) {
+			if(addReserv.reservationStation[i].isBusy) {
+				co++;
+			}
+		}
+		addReserv.busySize = co;
+		
+		// mul
+		co = 0;
+		for(int i = 0; i < 3; i++) {
+			if(mulReserv.reservationStation[i].isBusy) {
+				co++;
+			}
+		}
+		mulReserv.busySize = co;
+		
+		// load
+		co = 0;
+		for(int i = 0; i < 3; i++) {
+			if(loadReserv.reservationStation[i].isBusy) {
+				co++;
+			}
+		}
+		loadReserv.busySize = co;
+	}
+	
 	void updateCertainRS(Reserv r, int instrIndex, int writeBackId, int tempIndex) {
 		Iterator<Reserv> setIterator = r.waitReserv.iterator();
 		while (setIterator.hasNext()) {

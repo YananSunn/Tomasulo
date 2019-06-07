@@ -211,7 +211,7 @@ public class UIPanel extends JFrame {
 		ltop.setBorder(new EmptyBorder(30,30,30,30));
 		ltop.setLayout(new GridLayout(3,1,0,0));
 		
-		warning = new JLabel("Warning", JLabel.CENTER);
+		warning = new JLabel("", JLabel.CENTER);
 		ltop.add(warning);
 		
 		
@@ -634,7 +634,7 @@ public class UIPanel extends JFrame {
 	public void updateUI() {
 		// need to update
 		
-		warning.setText(String.valueOf(sim.currentInstr));
+		warning.setText("current instruction:" + String.valueOf(sim.currentInstr));
 		
 		if(checkInstr != -1) {
 			instr.setText(sim.instructions.instructionsString[checkInstr]);
