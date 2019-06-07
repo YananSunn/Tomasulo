@@ -20,10 +20,10 @@ public class RegisterResult {
 	
 	void checkFu() {
 		System.out.println("This is Register Result Status:");
-		for(int i = 0; i < 32; i++) {
-			System.out.print(i + ":" + fuState[i] + " ");
-		}
-		System.out.println();
+//		for(int i = 0; i < 32; i++) {
+//			System.out.print(i + ":" + fuState[i] + " ");
+//		}
+//		System.out.println();
 		for(int i = 0; i < tempCount; i++) {
 			System.out.print(i + ":" + tempReg[i] + " ");
 		}

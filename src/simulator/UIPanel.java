@@ -713,9 +713,19 @@ public class UIPanel extends JFrame {
 					}
 					if(sim.addReserv.reservationStation[i].Q[0] < 0) {
 						addRes[i][7].setText(getState(sim.addReserv.reservationStation[i].Q[0]));
+						System.out.println("??? " +i + " Q[0] " + sim.addReserv.reservationStation[i].Q[0] + " text "+ getState(sim.addReserv.reservationStation[i].Q[0]));
+						
 					}
 					if(sim.addReserv.reservationStation[i].Q[1] < 0) {
 						addRes[i][8].setText(getState(sim.addReserv.reservationStation[i].Q[1]));
+					}
+					break;
+				case JUMP:
+					if(sim.addReserv.reservationStation[i].V[0] >= 0) {
+						addRes[i][5].setText(decToHex(getValue(sim.addReserv.reservationStation[i].V[0])));
+					}
+					if(sim.addReserv.reservationStation[i].Q[0] < 0) {
+						addRes[i][7].setText(getState(sim.addReserv.reservationStation[i].Q[0]));
 					}
 					break;
 				case ADDI:

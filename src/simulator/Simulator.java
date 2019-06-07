@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 
 
 public class Simulator {
@@ -58,6 +59,22 @@ public class Simulator {
     public static final int MULTIME = 4;
     
     public static final int STIME = 3;
+    
+    
+	public static final int ADD5 = -1;
+	public static final int ADD4 = -2;
+	public static final int ADD3 = -3;
+	public static final int ADD2 = -4;
+	public static final int ADD1 = -5;
+	public static final int ADD0 = -6;
+	public static final int MUL2 = -7;
+	public static final int MUL1 = -8;
+	public static final int MUL0 = -9;
+	public static final int LOAD2 = -10;
+	public static final int LOAD1 = -11;
+	public static final int LOAD0 = -12;
+	
+	
     
 	Simulator(){
 		fileName = "test1.nel";
@@ -495,8 +512,24 @@ public class Simulator {
 			this.clock++;
 		}
 //		printAll();
-		System.out.println("++++++++++++++++++++++++++++++++++++++++++++++");
+		
 		addReserv.checkReserv();
+		
+		System.out.println("++++++++++++++++++++++++++++++++++++++++++++++");
+		System.out.println(addReserv.reservationStation[0].waitReserv.size());
+		System.out.println(addReserv.reservationStation[0].waitReserv.contains(addReserv.reservationStation[0]));
+		System.out.println(addReserv.reservationStation[0].waitReserv.contains(addReserv.reservationStation[1]));
+		System.out.println(addReserv.reservationStation[0].waitReserv.contains(addReserv.reservationStation[2]));
+		System.out.println(addReserv.reservationStation[0].waitReserv.contains(addReserv.reservationStation[3]));
+		System.out.println(addReserv.reservationStation[0].waitReserv.contains(addReserv.reservationStation[4]));
+		System.out.println(addReserv.reservationStation[0].waitReserv.contains(addReserv.reservationStation[5]));
+		System.out.println(addReserv.reservationStation[0].waitReserv.contains(mulReserv.reservationStation[0]));
+		System.out.println(addReserv.reservationStation[0].waitReserv.contains(mulReserv.reservationStation[1]));
+		System.out.println(addReserv.reservationStation[0].waitReserv.contains(mulReserv.reservationStation[2]));
+		
+//		reg.checkFu();
+//		mulReserv.checkReserv();
+//		loadReserv.checkReserv();
 		return clock-1;
 	}
 	
@@ -604,12 +637,14 @@ public class Simulator {
 			case SUB:
 				if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
 					this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
+					addHashSet(0, selectedRS, this.addReserv.reservationStation[selectedRS].Q[0]);
 				}
 				else {
 					this.addReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
 				}
 				if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3] != -10086) {
 					this.addReserv.reservationStation[selectedRS].Q[1] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3];
+					addHashSet(0, selectedRS, this.addReserv.reservationStation[selectedRS].Q[1]);
 				}
 				else {
 					this.addReserv.reservationStation[selectedRS].V[1] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand3];
@@ -619,6 +654,7 @@ public class Simulator {
 			case SUBI:
 				if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
 					this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
+					addHashSet(0, selectedRS, this.addReserv.reservationStation[selectedRS].Q[0]);
 				}
 				else {
 					this.addReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
@@ -660,12 +696,14 @@ public class Simulator {
 			
 			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
 				this.mulReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
+				addHashSet(1, selectedRS, this.mulReserv.reservationStation[selectedRS].Q[0]);
 			}
 			else {
 				this.mulReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
 			}
 			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3] != -10086) {
 				this.mulReserv.reservationStation[selectedRS].Q[1] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand3];
+				addHashSet(1, selectedRS, this.mulReserv.reservationStation[selectedRS].Q[1]);
 			}
 			else {
 				this.mulReserv.reservationStation[selectedRS].V[1] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand3];
@@ -710,6 +748,7 @@ public class Simulator {
 			
 			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
 				this.mulReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
+				addHashSet(1, selectedRS, this.mulReserv.reservationStation[selectedRS].Q[0]);
 			}
 			else {
 				this.mulReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
@@ -765,6 +804,7 @@ public class Simulator {
 			
 			if(this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2] != -10086) {
 				this.addReserv.reservationStation[selectedRS].Q[0] = this.reg.fuState[this.instructions.instruction[this.currentInstr].operand2];
+				addHashSet(0, selectedRS, this.addReserv.reservationStation[selectedRS].Q[0]);
 			}
 			else {
 				this.addReserv.reservationStation[selectedRS].V[0] = this.reg.fuValue[this.instructions.instruction[this.currentInstr].operand2];
@@ -833,27 +873,22 @@ public class Simulator {
 					reg.tempReg[reg.tempCount] = reg.tempReg[addReserv.reservationStation[i].V[0]] - addReserv.reservationStation[i].V[1];
 					reg.tempCount++;
 					break;
-//				case JUMP:
-//					if(instructions.instruction[addReserv.reservationStation[i].instrIndex].operand1 == reg.tempReg[addReserv.reservationStation[i].V[0]]) {
-//						// jump
-//						currentInstr = reg.tempReg[addReserv.reservationStation[i].V[1]] + instructions.instruction[addReserv.reservationStation[i].instrIndex].operand3;
-//					}
-//					else {
-//						// not jump
-//					}
-//					break;
 				}
 				// update FU
 //				reg.Fu[instructions.instruction[addReserv.reservationStation[i].instrIndex].operand1] = reg.tempCount - 1;
 				
 				int ind = addReserv.reservationStation[i].instrIndex;
+				
+				updateCertainRS(addReserv.reservationStation[i], ind, i-6, reg.tempCount - 1);
+				
 				// addReserv clear
 				addReserv.reservationStation[i].clearReserv();
 				addReserv.busySize--;
 				addFunc.busySize--;
 				
 				// update RS
-				updateReservationSta(ind, i - 6, reg.tempCount - 1);
+//				updateReservationSta(ind, i - 6, reg.tempCount - 1);
+				
 				
 
 			}
@@ -920,13 +955,18 @@ public class Simulator {
 //				reg.Fu[instructions.instruction[mulReserv.reservationStation[i].instrIndex].operand1] = reg.tempCount - 1;
 				
 				int ind = mulReserv.reservationStation[i].instrIndex;
+				
+				updateCertainRS(mulReserv.reservationStation[i], ind, i-9, reg.tempCount - 1);
+				
+				
 				// addReserv clear
 				mulReserv.reservationStation[i].clearReserv();
 				mulReserv.busySize--;
 				mulFunc.busySize--;
 				
 				// update RS
-				updateReservationSta(ind, i - 9, reg.tempCount - 1);
+//				updateReservationSta(ind, i - 9, reg.tempCount - 1);
+				
 			}
 		}
 		
@@ -971,68 +1011,45 @@ public class Simulator {
 				//reg.Fu[instructions.instruction[loadReserv.reservationStation[i].instrIndex].operand1] = reg.tempCount - 1;
 				
 				int ind = loadReserv.reservationStation[i].instrIndex;
+				
+				updateCertainRS(loadReserv.reservationStation[i], ind, i-12, reg.tempCount - 1);
+				
 				// addReserv clear
 				loadReserv.reservationStation[i].clearReserv();
 				loadReserv.busySize--;
 				loadFunc.busySize--;
 				
 				// update RS and FU
-				updateReservationSta(ind, i - 12, reg.tempCount - 1);
+//				updateReservationSta(ind, i - 12, reg.tempCount - 1);
 			}
 		}
 		
 	}
-	
-	
-	void updateReservationSta(int instrIndex, int writeBackId, int tempIndex) {
-		// add
-		for(int i = 0; i < 6; i++) {
-			// wait for data
-			if(addReserv.reservationStation[i].Q[0] == writeBackId) {
+	void updateCertainRS(Reserv r, int instrIndex, int writeBackId, int tempIndex) {
+		Iterator<Reserv> setIterator = r.waitReserv.iterator();
+		while (setIterator.hasNext()) {
+			Reserv re = setIterator.next();
+			if(re.Q[0] == writeBackId) {
 				// update data
-				addReserv.reservationStation[i].V[0] = tempIndex;
-				addReserv.reservationStation[i].Q[0] = 0;
+				re.V[0] = tempIndex;
+				re.Q[0] = 0;
 			}
-			if(addReserv.reservationStation[i].Q[1] == writeBackId) {
-				// update data
-				addReserv.reservationStation[i].V[1] = tempIndex;
-				addReserv.reservationStation[i].Q[1] = 0;
-			}
-//			if(readyToRun(addReserv.reservationStation[i])) {
-//				addReserv.reservationStation[i].isRun = true;
-//			}
-		}
-		
-		// mul
-		for(int i = 0; i < 3; i++) {
-			// wait for data
-			if(mulReserv.reservationStation[i].Q[0] == writeBackId) {
-				// update data
-				mulReserv.reservationStation[i].V[0] = tempIndex;
-				mulReserv.reservationStation[i].Q[0] = 0;
-			}
-			if(mulReserv.reservationStation[i].Q[1] == writeBackId) {
-				// div 0 
-				if(reg.tempReg[tempIndex] == 0 && mulReserv.reservationStation[i].type == DIV) {
+			if(re.Q[1] == writeBackId) {
+				
+				if(reg.tempReg[tempIndex] == 0 && re.type == DIV) {
 					reg.tempReg[reg.tempCount] = 1;
-					mulReserv.reservationStation[i].V[1] = reg.tempCount;
-					mulReserv.reservationStation[i].Q[1] = 0;
-					mulReserv.reservationStation[i].time = 1;
+					re.V[1] = reg.tempCount;
+					re.Q[1] = 0;
+					re.time = 1;
 					reg.tempCount++;
 				}
 				else {
 					// update data
-					mulReserv.reservationStation[i].V[1] = tempIndex;
-					mulReserv.reservationStation[i].Q[1] = 0;
+					re.V[1] = tempIndex;
+					re.Q[1] = 0;
 				}
 			}
-			
-//			if(readyToRun(mulReserv.reservationStation[i])) {
-//				mulReserv.reservationStation[i].isRun = true;
-//			}
 		}
-		
-		
 		// Fu
 		for(int i = 0; i < 32; i++) {
 			if(reg.fuState[i] == writeBackId) {
@@ -1059,8 +1076,139 @@ public class Simulator {
 		case JUMP:
 			break;
 		}
+	}
+	
+	void addHashSet(int type, int index, int waitReservId) {
+		switch(waitReservId) {
+		case ADD5:
+			myAdd(addReserv.reservationStation[5], type, index);
+			break;	
+		case ADD4:
+			myAdd(addReserv.reservationStation[4], type, index);
+			break;
+		case ADD3:
+			myAdd(addReserv.reservationStation[3], type, index);
+			break;
+		case ADD2:
+			myAdd(addReserv.reservationStation[2], type, index);
+			break;
+		case ADD1:
+			myAdd(addReserv.reservationStation[1], type, index);
+			break;
+		case ADD0:
+			myAdd(addReserv.reservationStation[0], type, index);
+			break;
+		case MUL2:
+			myAdd(mulReserv.reservationStation[2], type, index);
+			break;
+		case MUL1:
+			myAdd(mulReserv.reservationStation[1], type, index);
+			break;
+		case MUL0:
+			myAdd(mulReserv.reservationStation[0], type, index);
+			break;
+		case LOAD2:
+			myAdd(loadReserv.reservationStation[2], type, index);
+			break;
+		case LOAD1:
+			myAdd(loadReserv.reservationStation[1], type, index);
+			break;
+		case LOAD0:
+			myAdd(loadReserv.reservationStation[0], type, index);
+			break;
+		}
+		
 		
 	}
+	
+	void myAdd(Reserv r, int type, int index) {
+		switch(type) {
+		case 0:
+			r.waitReserv.add(addReserv.reservationStation[index]);
+			break;
+		case 1:
+			r.waitReserv.add(mulReserv.reservationStation[index]);
+			break;
+		}
+	}
+	
+	
+//	void updateReservationSta(int instrIndex, int writeBackId, int tempIndex) {
+//		// add
+//		for(int i = 0; i < 6; i++) {
+//			// wait for data
+//			if(addReserv.reservationStation[i].Q[0] == writeBackId) {
+//				// update data
+//				addReserv.reservationStation[i].V[0] = tempIndex;
+//				addReserv.reservationStation[i].Q[0] = 0;
+//			}
+//			if(addReserv.reservationStation[i].Q[1] == writeBackId) {
+//				// update data
+//				addReserv.reservationStation[i].V[1] = tempIndex;
+//				addReserv.reservationStation[i].Q[1] = 0;
+//			}
+////			if(readyToRun(addReserv.reservationStation[i])) {
+////				addReserv.reservationStation[i].isRun = true;
+////			}
+//		}
+//		
+//		// mul
+//		for(int i = 0; i < 3; i++) {
+//			// wait for data
+//			if(mulReserv.reservationStation[i].Q[0] == writeBackId) {
+//				// update data
+//				mulReserv.reservationStation[i].V[0] = tempIndex;
+//				mulReserv.reservationStation[i].Q[0] = 0;
+//			}
+//			if(mulReserv.reservationStation[i].Q[1] == writeBackId) {
+//				// div 0 
+//				if(reg.tempReg[tempIndex] == 0 && mulReserv.reservationStation[i].type == DIV) {
+//					reg.tempReg[reg.tempCount] = 1;
+//					mulReserv.reservationStation[i].V[1] = reg.tempCount;
+//					mulReserv.reservationStation[i].Q[1] = 0;
+//					mulReserv.reservationStation[i].time = 1;
+//					reg.tempCount++;
+//				}
+//				else {
+//					// update data
+//					mulReserv.reservationStation[i].V[1] = tempIndex;
+//					mulReserv.reservationStation[i].Q[1] = 0;
+//				}
+//			}
+//			
+////			if(readyToRun(mulReserv.reservationStation[i])) {
+////				mulReserv.reservationStation[i].isRun = true;
+////			}
+//		}
+//		
+//		
+//		// Fu
+//		for(int i = 0; i < 32; i++) {
+//			if(reg.fuState[i] == writeBackId) {
+//				reg.fuState[i] = -10086;
+//			}
+//		}
+//		System.out.println(instrIndex);
+//		switch(instructions.instruction[instrIndex].instrType) {
+//		case ADD:
+//		case ADDI:
+//		case SUB:
+//		case SUBI:
+//		case MUL:
+//		case DIV:
+//		case LD:
+//		case SHL:
+//		case SAL:
+//		case SHR:
+//		case SAR:
+//			if(reg.fuState[instructions.instruction[instrIndex].operand1] == -10086) {
+//				reg.fuValue[instructions.instruction[instrIndex].operand1] = tempIndex;
+//			}
+//			break;
+//		case JUMP:
+//			break;
+//		}
+//	}
 
 	void ExecComp() {
 		System.out.println("ExecComp()");
@@ -1200,36 +1348,6 @@ public class Simulator {
 		}
 		return false;
 	}
-	
-//	void updateFunc() {
-//		int co = 0;
-//		
-//		// add
-//		for(int i = 0; i < 6; i++) {
-//			if(addReserv.reservationStation[i].isBusy && addReserv.reservationStation[i].isRun) {
-//				co++;
-//			}
-//		}
-//		addFunc.busySize = co;
-//		
-//		// mul
-//		co = 0;
-//		for(int i = 0; i < 3; i++) {
-//			if(mulReserv.reservationStation[i].isBusy && mulReserv.reservationStation[i].isRun) {
-//				co++;
-//			}
-//		}
-//		mulFunc.busySize = co;
-//		
-//		// load
-//		co = 0;
-//		for(int i = 0; i < 3; i++) {
-//			if(loadReserv.reservationStation[i].isBusy && loadReserv.reservationStation[i].isRun) {
-//				co++;
-//			}
-//		}
-//		loadFunc.busySize = co;
-//	}
 	
 	void clearAll() {
 		currentInstr = 0;

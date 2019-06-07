@@ -1,5 +1,8 @@
 package simulator;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Reserv {
 	boolean isBusy;
 	boolean isRun;
@@ -12,6 +15,8 @@ public class Reserv {
 	int[] Q = {0, 0};
 	
 	int instrIndex;
+	
+	Set<Reserv> waitReserv;
 	
 	
 	public static final int ADD5 = -1;
@@ -43,6 +48,7 @@ public class Reserv {
     public static final int SAR = 13; // À„ ˝”““∆
     
     Reserv(){
+    	waitReserv = new HashSet<Reserv>();
     	isBusy = false;
     	isRun = false;
     	canRB = false;
@@ -53,6 +59,7 @@ public class Reserv {
     }
     
     void clearReserv() {
+    	waitReserv.clear();
     	isBusy = false;
     	isRun = false;
     	time = -1;
