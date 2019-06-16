@@ -4,14 +4,19 @@ public class RegisterResult {
 	int[] fuState;
 	int[] fuValue;
 	int[] tempReg;
+	
+	int[] originIndex;
+			
 	int tempCount;
 	
 	RegisterResult(){
 		fuState = new int[32];
 		fuValue = new int[32];
+		originIndex = new int[32];
 		for(int i = 0; i < 32; i++) {
 			fuState[i] = -2147483648;
 			fuValue[i] = 0;
+			originIndex[i] = -1;
 		}
 		
 		tempReg = new int[10000000];
@@ -21,10 +26,14 @@ public class RegisterResult {
 	
 	void checkFu() {
 		System.out.println("This is Register Result Status:");
-//		for(int i = 0; i < 32; i++) {
-//			System.out.print(i + ":" + fuState[i] + " ");
-//		}
-//		System.out.println();
+		for(int i = 0; i < 32; i++) {
+			System.out.print(i + ":" + fuState[i] + " ");
+		}
+		System.out.println();
+		for(int i = 0; i < 32; i++) {
+		System.out.print(i + ":" + fuValue[i] + " ");
+	}
+		System.out.println();
 		for(int i = 0; i < tempCount; i++) {
 			System.out.print(i + ":" + tempReg[i] + " ");
 		}
@@ -35,6 +44,7 @@ public class RegisterResult {
 		for(int i = 0; i < 32; i++) {
 			fuState[i] = -2147483648;
 			fuValue[i] = 0;
+			originIndex[i] = -1;
 		}
 		for(int i = 0; i < tempCount; i++) {
 			tempReg[i] = -2147483648;

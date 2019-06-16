@@ -680,7 +680,7 @@ public class UIPanel extends JFrame {
 			}
 //			if(sim.reg.fuValue[i] != -2147483648) {
 				FValue[i].setText(decToHex(getValue(sim.reg.fuValue[i])));
-				if(F[i].getText() == "" && sim.reg.fuValue[i]!=0) {
+				if(F[i].getText() == "" && sim.reg.originIndex[i]!=-1) {
 					F[i].setText(decToHex(getValue(sim.reg.fuValue[i])));
 				}
 //			}

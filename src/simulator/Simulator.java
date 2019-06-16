@@ -508,6 +508,8 @@ public class Simulator {
 			ExecComp();
 			updateReSize();
 //			WriteBack();
+			
+			reg.checkFu();
 		
 			this.clock++;
 		}
@@ -1068,6 +1070,9 @@ public class Simulator {
 		for(int i = 0; i < 32; i++) {
 			if(reg.fuState[i] == writeBackId) {
 				reg.fuState[i] = -2147483648;
+				if(reg.originIndex[i] < instrIndex) {
+					reg.originIndex[i] = instrIndex;
+				}
 			}
 		}
 //		System.out.println(instrIndex);
@@ -1083,8 +1088,10 @@ public class Simulator {
 		case SAL:
 		case SHR:
 		case SAR:
-			if(reg.fuState[instructions.instruction[instrIndex].operand1] == -2147483648) {
-				reg.fuValue[instructions.instruction[instrIndex].operand1] = tempIndex;
+			if(reg.originIndex[instructions.instruction[instrIndex].operand1] <= instrIndex) {
+				if(reg.fuState[instructions.instruction[instrIndex].operand1] == -2147483648) {
+					reg.fuValue[instructions.instruction[instrIndex].operand1] = tempIndex;
+				}
 			}
 			break;
 		case JUMP:
