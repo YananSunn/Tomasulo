@@ -10,12 +10,13 @@ public class RegisterResult {
 		fuState = new int[32];
 		fuValue = new int[32];
 		for(int i = 0; i < 32; i++) {
-			fuState[i] = -10086;
-			fuValue[i] = -10086;
+			fuState[i] = -2147483648;
+			fuValue[i] = 0;
 		}
 		
-		tempReg = new int[5005];
-		tempCount = 0;
+		tempReg = new int[10000000];
+		tempReg[0] = 0;
+		tempCount = 1;
 	}
 	
 	void checkFu() {
@@ -32,12 +33,13 @@ public class RegisterResult {
 	
 	void clearFu() {
 		for(int i = 0; i < 32; i++) {
-			fuState[i] = -10086;
-			fuValue[i] = -10086;
+			fuState[i] = -2147483648;
+			fuValue[i] = 0;
 		}
 		for(int i = 0; i < tempCount; i++) {
-			tempReg[i] = -10086;
+			tempReg[i] = -2147483648;
 		}
-		tempCount = 0;
+		tempReg[0] = 0;
+		tempCount = 1;
 	}
 }

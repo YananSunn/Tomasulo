@@ -161,7 +161,7 @@ public class UIPanel extends JFrame {
             JFrame.setDefaultLookAndFeelDecorated(true);
             JDialog.setDefaultLookAndFeelDecorated(true);
         } catch (Exception e) {
-            System.err.println("Something went wrong!");
+//            System.err.println("Something went wrong!");
         }
 		
 		mainPanel = new JPanel();
@@ -450,7 +450,7 @@ public class UIPanel extends JFrame {
 					openPath=fileChooser.getSelectedFile().getPath();
 					
 					try {
-						System.out.println(openPath);
+//						System.out.println(openPath);
 						sim = new Simulator(openPath);
 						sim.readFileByLines(sim.fileName);
 						
@@ -463,6 +463,9 @@ public class UIPanel extends JFrame {
 		
 		runSimu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				for(int i = 3; i < 6; i++) {
+					instrForm[i].setText("");
+				}
 				System.out.println("try to run the Simulator");
 				illegal = false;
 				warning.setText("");
@@ -471,7 +474,7 @@ public class UIPanel extends JFrame {
 					try {
 						if(clockTex.getText().length() != 0) {
 							checkClock = Integer.valueOf(clockTex.getText()).intValue();
-							System.out.println("checkClock = " + checkClock);
+//							System.out.println("checkClock = " + checkClock);
 							if(checkClock <= 0) {
 								// illegal
 								warning.setText("Clock index is illegal.");
@@ -490,7 +493,7 @@ public class UIPanel extends JFrame {
 					try {
 						if((instrTex.getText().length()) != 0) {
 							checkInstr = Integer.valueOf(instrTex.getText()).intValue();
-							System.out.println("checkInstr = " + checkInstr);
+//							System.out.println("checkInstr = " + checkInstr);
 							if(checkInstr < 0 || checkInstr >= sim.instructions.instrSize) {
 								warning.setText("Instruction index is illegal.");
 								illegal = true;
@@ -553,7 +556,7 @@ public class UIPanel extends JFrame {
 	            SubstanceLookAndFeel.setCurrentTitlePainter(new MatteHeaderPainter()); 
 	            ltop.setBorder(BorderFactory.createLineBorder(new Color(125,204,209), 3, true));
 	        } catch (Exception e) {
-	            System.err.println("Something went wrong!");
+//	            System.err.println("Something went wrong!");
 	        }
 			break;
 		case 1:
@@ -562,7 +565,7 @@ public class UIPanel extends JFrame {
 	            SubstanceLookAndFeel.setCurrentTheme("org.jvnet.substance.theme.SubstanceDarkVioletTheme");
 	            ltop.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(206,120,235)));
 	        } catch (Exception e) {
-	            System.err.println("Something went wrong!");
+//	            System.err.println("Something went wrong!");
 	        }
 			break;
 		case 2:
@@ -577,7 +580,7 @@ public class UIPanel extends JFrame {
 	            SubstanceLookAndFeel.setCurrentGradientPainter(new StandardGradientPainter());
 	            ltop.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(124,173,152)));
 	        } catch (Exception e) {
-	            System.err.println("Something went wrong!");
+//	            System.err.println("Something went wrong!");
 	        }
 			break;
 		}
@@ -669,21 +672,21 @@ public class UIPanel extends JFrame {
 		
 		
 		for(int i = 0; i < 32; i++) {
-			if(sim.reg.fuState[i] != -10086) {
+			if(sim.reg.fuState[i] != -2147483648) {
 				F[i].setText(getState(sim.reg.fuState[i]));
 			}
 			else {
 				F[i].setText("");
 			}
-			if(sim.reg.fuValue[i] != -10086) {
+//			if(sim.reg.fuValue[i] != -2147483648) {
 				FValue[i].setText(decToHex(getValue(sim.reg.fuValue[i])));
-				if(F[i].getText() == "") {
+				if(F[i].getText() == "" && sim.reg.fuValue[i]!=0) {
 					F[i].setText(decToHex(getValue(sim.reg.fuValue[i])));
 				}
-			}
-			else {
-				FValue[i].setText("");
-			}
+//			}
+//			else {
+//				FValue[i].setText("");
+//			}
 		}
 		
 		
@@ -713,7 +716,7 @@ public class UIPanel extends JFrame {
 					}
 					if(sim.addReserv.reservationStation[i].Q[0] < 0) {
 						addRes[i][7].setText(getState(sim.addReserv.reservationStation[i].Q[0]));
-						System.out.println("??? " +i + " Q[0] " + sim.addReserv.reservationStation[i].Q[0] + " text "+ getState(sim.addReserv.reservationStation[i].Q[0]));
+//						System.out.println("??? " +i + " Q[0] " + sim.addReserv.reservationStation[i].Q[0] + " text "+ getState(sim.addReserv.reservationStation[i].Q[0]));
 						
 					}
 					if(sim.addReserv.reservationStation[i].Q[1] < 0) {

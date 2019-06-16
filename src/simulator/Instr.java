@@ -70,4 +70,11 @@ public class Instr {
         writeResultClock = -1;
         useReserv = 0;
     }
+    
+    void clearInstr() {
+        issueClock = -1;
+        execCompClock = -1;
+        writeResultClock = -1;
+        useReserv = 0;
+    }
 }

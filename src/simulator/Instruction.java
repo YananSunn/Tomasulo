@@ -6,8 +6,8 @@ public class Instruction {
 	int instrSize;
 	
 	Instruction(){
-		instruction = new Instr[1000];
-		instructionsString = new String[1000];
+		instruction = new Instr[1000005];
+		instructionsString = new String[1000005];
 	}
 	
 	void checkInstr() {
@@ -20,6 +20,12 @@ public class Instruction {
 					" execCompClock:" + instruction[i].execCompClock +
 					" writeResultClock:" + instruction[i].writeResultClock +
 					" useReserv:" + instruction[i].useReserv);
+		}
+	}
+	
+	void clearInstruction() {
+		for(int i = 0; i < instrSize; i++) {
+			instruction[i].clearInstr();
 		}
 	}
 }
